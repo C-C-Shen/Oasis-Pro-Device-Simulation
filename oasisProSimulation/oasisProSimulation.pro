@@ -18,15 +18,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    profile.cpp \
     recording.cpp \
-    therapy.cpp
+    session.cpp
 
 HEADERS += \
     mainwindow.h \
-    profile.h \
     recording.h \
-    therapy.h
+    session.h
 
 FORMS += \
     mainwindow.ui
