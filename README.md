@@ -1,2 +1,11 @@
-# Oasis-Pro-Device-Simulation
-COMP3004A Stuff
+# COMP3004 Team 33
+## Team Members
+- Gurpiar Brar
+  - 
+- Kayla Gingras
+  - UI
+  - Documentation
+- Christopher Shen
+  -
+ 
+ ## TODO
