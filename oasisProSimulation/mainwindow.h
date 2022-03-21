@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <QElapsedTimer>
 #include <iostream>
 #include <vector>
 
@@ -28,6 +29,9 @@ class MainWindow : public QMainWindow
         double batteryLvl; // battery level ranging from 0-100
         int intensityLvl; // current session intensity level
         int sessionLength; // total current session length (in minutes)
+
+        // test for timing button presses
+        QElapsedTimer elapsedTimer;
 
         // objects
         Ui::MainWindow *ui;
@@ -70,6 +74,11 @@ class MainWindow : public QMainWindow
 
         /// Perform connection test
         void testConnection();
+
+    private slots:
+        // button handling
+        void powerButtonPress();
+        void powerButtonRelease();
 
    /* TODO: implement slots
     * private slots:
