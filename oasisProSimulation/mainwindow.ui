@@ -469,7 +469,7 @@ border-radius: 25px;</string>
    <widget class="QPushButton" name="chargeBatteryButton">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>10</x>
       <y>10</y>
       <width>91</width>
       <height>31</height>
@@ -482,14 +482,14 @@ border-radius: 25px;</string>
    <widget class="QPushButton" name="connectToSkinButton">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>10</x>
       <y>50</y>
-      <width>91</width>
+      <width>141</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Connect to Skin</string>
+     <string>Toggle Skin Connection</string>
     </property>
    </widget>
    <widget class="QWidget" name="verticalLayoutWidget_3">

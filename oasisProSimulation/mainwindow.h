@@ -36,6 +36,29 @@ class MainWindow : public QMainWindow
         Session* currentSession; // current session being used
         std::vector<Session*> sessions; // all possible sessions
 
+        QPixmap sessionLength20_on;
+        QPixmap sessionLength20_off;
+        QPixmap sessionLength45_on;
+        QPixmap sessionLength45_off;
+        QPixmap userDesigned_on;
+        QPixmap userDesigned_off;
+        QPixmap theta_on;
+        QPixmap theta_off;
+        QPixmap alpha_on;
+        QPixmap alpha_off;
+        QPixmap delta_on;
+        QPixmap delta_off;
+        QPixmap subDelta_on;
+        QPixmap subDelta_off;
+        QPixmap L_on;
+        QPixmap L_off;
+        QPixmap R_on;
+        QPixmap R_off;
+        QPixmap dutyCES_on;
+        QPixmap dutyCES_off;
+        QPixmap shortCES_on;
+        QPixmap shortCES_off;
+
         // functions
         /// Initialize sessions
         void initSessions();
@@ -45,9 +68,6 @@ class MainWindow : public QMainWindow
 
         /// Handle power off
         void handlePowerOff();
-
-        /// Charge batteryLvl to full
-        void chargeBattery();
 
         /// Deplete batteryLvl by a variable level depending on length, intensity, and skin connection
         void depleteBattery();
@@ -64,9 +84,6 @@ class MainWindow : public QMainWindow
         /// Record last session
         void recordSession();
 
-        /// Set skinConnection bool
-        void connectToSkin(bool skinConnected);
-
         /// Adjust intensityLvl to newIntensity
         void adjustIntensity(int newIntensity);
 
@@ -77,5 +94,15 @@ class MainWindow : public QMainWindow
         // button handling
         void powerButtonPress();
         void powerButtonRelease();
+
+        /// Charge batteryLvl to full
+        void chargeBattery();
+
+        /// Toggle skinConnection bool
+        void connectToSkin();
+
+        void upButtonPress();
+        void downButtonPress();
+        void confirmButtonPress();
 };
 #endif // MAINWINDOW_H
