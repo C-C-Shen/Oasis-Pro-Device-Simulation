@@ -1,8 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <iostream>
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -18,21 +16,66 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->downButton, SIGNAL(pressed()), this, SLOT(downButtonPress()));
     connect(ui->confirmButton, SIGNAL(pressed()), this, SLOT(confirmButtonPress()));
 
+    // Initializing vector pixmaps
+    sessionLength_on.push_back(QPixmap(":/icons/20min_on.png"));
+    sessionLength_on.push_back(QPixmap(":/icons/45min_on.png"));
+    sessionLength_on.push_back(QPixmap(":/icons/userdesigned_on.png"));
+    sessionLength_off.push_back(QPixmap(":/icons/20min_off.png"));
+    sessionLength_off.push_back(QPixmap(":/icons/45min_off.png"));
+    sessionLength_off.push_back(QPixmap(":/icons/userdesigned_off.png"));
+
+    sessionType_on.push_back(QPixmap(":/icons/subdelta_on.png"));
+    sessionType_on.push_back(QPixmap(":/icons/delta_on.png"));
+    sessionType_on.push_back(QPixmap(":/icons/theta_on.png"));
+    sessionType_on.push_back(QPixmap(":/icons/alpha_on.png"));
+    sessionType_off.push_back(QPixmap(":/icons/subdelta_off.png"));
+    sessionType_off.push_back(QPixmap(":/icons/delta_off.png"));
+    sessionType_off.push_back(QPixmap(":/icons/theta_off.png"));
+    sessionType_off.push_back(QPixmap(":/icons/alpha_off.png"));
+
+    sessionNum_on.push_back("QLabel { color: #26ff00 }");
+    sessionNum_on.push_back("QLabel { color: #26ff00 }");
+    sessionNum_on.push_back("QLabel { color: #26ff00 }");
+    sessionNum_on.push_back("QLabel { color: #fff700 }");
+    sessionNum_on.push_back("QLabel { color: #fff700 }");
+    sessionNum_on.push_back("QLabel { color: #fff700 }");
+    sessionNum_on.push_back("QLabel { color: #ff0000 }");
+    sessionNum_on.push_back("QLabel { color: #ff0000 }");
+    sessionNum_off = "QLabel { color: #000000 }";
+
+
+    // TODO: need to inicialize the sessionNumLabel and sessionStimLabel to appropriate QPixmap
+
+    // Initialize UI label vector pointers
+    sessionLengthLabel.push_back(ui->sessionLength20);
+    sessionLengthLabel.push_back(ui->sessionLength45);
+    sessionLengthLabel.push_back(ui->sessionLengthCustom);
+
+    sessionTypeLabel.push_back(ui->sessionSubDelta);
+    sessionTypeLabel.push_back(ui->sessionDelta);
+    sessionTypeLabel.push_back(ui->sessionTheta);
+    sessionTypeLabel.push_back(ui->sessionAlpha);
+
+
+    sessionNumLabel.push_back(ui->session1);
+    sessionNumLabel.push_back(ui->session2);
+    sessionNumLabel.push_back(ui->session3);
+    sessionNumLabel.push_back(ui->session4);
+    sessionNumLabel.push_back(ui->session5);
+    sessionNumLabel.push_back(ui->session6);
+    sessionNumLabel.push_back(ui->session7);
+    sessionNumLabel.push_back(ui->session8);
+
+    sessionStimLabel.push_back(ui->dcStimLevel1);
+    sessionStimLabel.push_back(ui->dcStimLevel2);
+    sessionStimLabel.push_back(ui->dcStimLevel3);
+    sessionStimLabel.push_back(ui->dcStimLevel4);
+    sessionStimLabel.push_back(ui->dcStimLevel5);
+    sessionStimLabel.push_back(ui->dcStimLevel6);
+    sessionStimLabel.push_back(ui->dcStimUserDesigned1);
+    sessionStimLabel.push_back(ui->dcStimUserDesigned1);
+
     // Initializing pixmaps
-    sessionLength20_on = QPixmap(":/icons/20min_on.png");
-    sessionLength20_off = QPixmap(":/icons/20min_off.png");
-    sessionLength45_on = QPixmap(":/icons/45min_on.png");
-    sessionLength45_off = QPixmap(":/icons/45min_off.png");
-    userDesigned_on = QPixmap(":/icons/userdesigned_on.png");
-    userDesigned_off = QPixmap(":/icons/userdesigned_off.png");
-    theta_on = QPixmap(":/icons/theta_on.png");
-    theta_off = QPixmap(":/icons/theta_off.png");
-    alpha_on = QPixmap(":/icons/alpha_on.png");
-    alpha_off = QPixmap(":/icons/alpha_off.png");
-    delta_on = QPixmap(":/icons/delta_on.png");
-    delta_off = QPixmap(":/icons/delta_off.png");
-    subDelta_on = QPixmap(":/icons/subdelta_on.png");
-    subDelta_off = QPixmap(":/icons/subdelta_off.png");
     L_on = QPixmap(":/icons/L_on.png");
     L_off = QPixmap(":/icons/L_off.png");
     R_on = QPixmap(":/icons/R_on.png");
@@ -79,6 +122,7 @@ void MainWindow::powerButtonRelease() {
     } else if (this->powerOn) {
         std::cout << "Normal Press" << std::endl;
         // TODO: call function relating to a simple press
+        switchGroups();
     } else {
         // this is just here for testing purpose, can be removed later
         std::cout << "Long press to turn on" << std::endl;
@@ -103,6 +147,8 @@ void MainWindow::upButtonPress()
     if (powerOn)
     {
         std::cout << "Up button pressed" << std::endl;
+        // TODO: add check to see what device state is in
+        switchType(1);
     }
 }
 
@@ -112,6 +158,8 @@ void MainWindow::downButtonPress()
     if (powerOn)
     {
         std::cout << "Down button pressed" << std::endl;
+        // TODO: add check to see what device state is in
+        switchType(-1);
     }
 }
 
@@ -126,15 +174,14 @@ void MainWindow::confirmButtonPress()
 
 void MainWindow::handlePowerOn()
 {
+    // display device power level
+    displayBatteryLevel();
+    // light up default value labels
+    sessionLengthLabel[0]->setPixmap(sessionLength_on[0]);
+    sessionTypeLabel[0]->setPixmap(sessionType_on[0]);
+
     // TODO: might want to find a way to turn LED on after 2 secs have passed (before button is let go) since that's what they have in the demo
     ui->ledLabel->setStyleSheet("background-color:green");
-    ui->sessionLength20->setPixmap(sessionLength20_on);
-    ui->sessionLength45->setPixmap(sessionLength45_on);
-    ui->sessionLengthCustom->setPixmap(userDesigned_on);
-    ui->sessionTheta->setPixmap(theta_on);
-    ui->sessionAlpha->setPixmap(alpha_on);
-    ui->sessionDelta->setPixmap(delta_on);
-    ui->sessionSubDelta->setPixmap(subDelta_on);
     ui->cesLeftLabel->setPixmap(L_on);
     ui->cesRightLabel->setPixmap(R_on);
     ui->cesShortLabel->setPixmap(shortCES_on);
@@ -143,16 +190,60 @@ void MainWindow::handlePowerOn()
 
 void MainWindow::handlePowerOff()
 {
+    for (std::size_t i = 0; i < sessionLengthLabel.size(); i++) {
+        sessionLengthLabel[i]->setPixmap(sessionLength_off[i]);
+    }
+    for (std::size_t i = 0; i < sessionTypeLabel.size(); i++) {
+        sessionTypeLabel[i]->setPixmap(sessionType_off[i]);
+    }
+    for (std::size_t i = 0; i < sessionNumLabel.size(); i++) {
+        sessionNumLabel[i]->setPixmap(sessionNum_off);
+    }
+
     ui->ledLabel->setStyleSheet("background-color:white");
-    ui->sessionLength20->setPixmap(sessionLength20_off);
-    ui->sessionLength45->setPixmap(sessionLength45_off);
-    ui->sessionLengthCustom->setPixmap(userDesigned_off);
-    ui->sessionTheta->setPixmap(theta_off);
-    ui->sessionAlpha->setPixmap(alpha_off);
-    ui->sessionDelta->setPixmap(delta_off);
-    ui->sessionSubDelta->setPixmap(subDelta_off);
     ui->cesLeftLabel->setPixmap(L_off);
     ui->cesRightLabel->setPixmap(R_off);
     ui->cesShortLabel->setPixmap(shortCES_off);
     ui->cesDutyLabel->setPixmap(dutyCES_off);
+}
+
+void MainWindow::displayBatteryLevel() {
+    int levelToDisplay = (batteryLvl * 0.8)/10; // convert battery level to be out of 8 instead of 100, since we have 8 lights to show level
+    std::cout << levelToDisplay << std::endl;
+    for (int i = 0; i < levelToDisplay; i++) {
+        sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
+    }
+    for (std::size_t i = levelToDisplay; i < sessionNumLabel.size(); i++) {
+        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
+    }
+}
+
+void MainWindow::switchGroups() {
+    // start by turning all appropriate labels "off"
+    for (std::size_t i = 0; i < sessionLengthLabel.size(); i++) {
+        sessionLengthLabel[i]->setPixmap(sessionLength_off[i]);
+    }
+    lengthPosition++;
+    // for groups, every iteration just increments by 1, until end reached, then return to beginning
+    if (lengthPosition > (int)sessionLengthLabel.size() - 1) {
+        lengthPosition = 0;
+    }
+    // turn "on" selected group label
+    sessionLengthLabel[lengthPosition]->setPixmap(sessionLength_on[lengthPosition]);
+}
+
+void MainWindow::switchType(int direction) {
+    // start by turning all appropriate labels "off"
+    for (std::size_t i = 0; i < sessionTypeLabel.size(); i++) {
+        sessionTypeLabel[i]->setPixmap(sessionType_off[i]);
+    }
+    typePosition += direction;
+    // for types, every iteration is either +1 or -1, if out of bounds, wrap around.
+    if (typePosition > (int)sessionTypeLabel.size() - 1) {
+        typePosition = 0;
+    } else if (typePosition < 0) {
+        typePosition = sessionTypeLabel.size() - 1;
+    }
+    // turn "on" selected type label
+    sessionTypeLabel[typePosition]->setPixmap(sessionType_on[typePosition]);
 }

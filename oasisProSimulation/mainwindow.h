@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QLabel>
 #include <QTimer>
 #include <QElapsedTimer>
 #include <iostream>
@@ -30,26 +31,39 @@ class MainWindow : public QMainWindow
         int intensityLvl; // current session intensity level
         int sessionLength; // total current session length (in minutes)
 
+        // variables holding specific positions for vectors
+        int lengthPosition = 0;
+        int typePosition = 0;
+
         QElapsedTimer elapsedTimer;
         Ui::MainWindow *ui;
         QTimer currentSessionTimer; // timer that calls timeout() to reduce battery level and check if session time is up
         Session* currentSession; // current session being used
         std::vector<Session*> sessions; // all possible sessions
 
-        QPixmap sessionLength20_on;
-        QPixmap sessionLength20_off;
-        QPixmap sessionLength45_on;
-        QPixmap sessionLength45_off;
-        QPixmap userDesigned_on;
-        QPixmap userDesigned_off;
-        QPixmap theta_on;
-        QPixmap theta_off;
-        QPixmap alpha_on;
-        QPixmap alpha_off;
-        QPixmap delta_on;
-        QPixmap delta_off;
-        QPixmap subDelta_on;
-        QPixmap subDelta_off;
+        // vector of QLabel objects, to help iterate over which to turn on and off
+        std::vector<QLabel *> sessionLengthLabel;
+        std::vector<QLabel *> sessionTypeLabel;
+        std::vector<QLabel *> sessionNumLabel;
+        std::vector<QLabel *> sessionStimLabel;
+
+        // have the "lights" be stored in vectors corresponding to their groups
+        // Positions: 0 -> 20, 1 -> 45, 2 -> user def
+        std::vector<QPixmap> sessionLength_on;
+        std::vector<QPixmap> sessionLength_off;
+
+        // Positions: 0 -> sub delta, 1 -> delta, 2 -> theta, 3 -> alpha
+        std::vector<QPixmap> sessionType_on;
+        std::vector<QPixmap> sessionType_off;
+
+        // Positions: 0 -> 1, 1 -> 2, ... 7 -> 8
+        std::vector<QString> sessionNum_on;
+        QString sessionNum_off;
+
+        // Positions: 0 -> 0.25, 1 -> 0.50, ...6 -> +1, 7 -> +2
+        std::vector<QPixmap> sessionStim_on;
+        std::vector<QPixmap> sessionStim_off;
+
         QPixmap L_on;
         QPixmap L_off;
         QPixmap R_on;
@@ -72,6 +86,9 @@ class MainWindow : public QMainWindow
         /// Deplete batteryLvl by a variable level depending on length, intensity, and skin connection
         void depleteBattery();
 
+        /// Display the current battery level using session number labels
+        void displayBatteryLevel();
+
         /// Notify user when batteryLvl is low
         void onBatteryLow();
 
@@ -89,6 +106,12 @@ class MainWindow : public QMainWindow
 
         /// Perform connection test
         void testConnection();
+
+        /// Switch between different session groups (ie, lengths)
+        void switchGroups();
+
+        /// Switch between different session types
+        void switchType(int direction);
 
     private slots:
         // button handling
