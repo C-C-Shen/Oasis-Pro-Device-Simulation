@@ -10,6 +10,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     connect(ui->powerButton, SIGNAL(pressed()), this, SLOT(powerButtonPress()));
     connect(ui->powerButton, SIGNAL(released()), this, SLOT(powerButtonRelease()));
+    connect(ui->chargeBatteryButton, SIGNAL(pressed()), this, SLOT(chargeBattery()));
+
+    powerOn = false;
+    skinConnection = false;
+    batteryLvl = 100.00;
+    intensityLvl = 0;
+    sessionLength = 0;
 }
 
 MainWindow::~MainWindow()
@@ -31,11 +38,11 @@ void MainWindow::powerButtonRelease() {
         if (this->powerOn) {
             std::cout << "Powering Off" << std::endl;
             this->powerOn = false;
-            // TODO: call function to "power off" device
+            handlePowerOff();
         } else {
             std::cout << "Powering On" << std::endl;
             this->powerOn = true;
-            // TODO: call function to "power on" device
+            handlePowerOn();
         }
         std::cout << "Device power state: " << this->powerOn << std::endl;
     } else if (this->powerOn) {
@@ -45,4 +52,19 @@ void MainWindow::powerButtonRelease() {
         // this is just here for testing purpose, can be removed later
         std::cout << "Long press to turn on" << std::endl;
     }
+}
+
+void MainWindow::handlePowerOn()
+{
+    // TODO: modify widgets to display their "on" state icons
+}
+
+void MainWindow::handlePowerOff()
+{
+    // TODO: modify widgets to display their "off" state icons
+}
+
+void MainWindow::chargeBattery()
+{
+    batteryLvl = 100.00;
 }

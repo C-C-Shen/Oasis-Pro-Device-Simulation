@@ -30,13 +30,8 @@ class MainWindow : public QMainWindow
         int intensityLvl; // current session intensity level
         int sessionLength; // total current session length (in minutes)
 
-        // test for timing button presses
         QElapsedTimer elapsedTimer;
-
-        // objects
         Ui::MainWindow *ui;
-        // TODO: might be better way to implement powerHoldTimer (internal power button timer?)
-        QTimer powerHoldTimer; // timer that keeps track of how long power button has been held
         QTimer currentSessionTimer; // timer that calls timeout() to reduce battery level and check if session time is up
         Session* currentSession; // current session being used
         std::vector<Session*> sessions; // all possible sessions
@@ -45,8 +40,11 @@ class MainWindow : public QMainWindow
         /// Initialize sessions
         void initSessions();
 
-        /// Toggle powerOn bool true/false
-        void togglePower();
+        /// Handle power on
+        void handlePowerOn();
+
+        /// Handle power off
+        void handlePowerOff();
 
         /// Charge batteryLvl to full
         void chargeBattery();
@@ -79,10 +77,5 @@ class MainWindow : public QMainWindow
         // button handling
         void powerButtonPress();
         void powerButtonRelease();
-
-   /* TODO: implement slots
-    * private slots:
-        void on_powerButton_press();
-        void on_powerButton_release();*/
 };
 #endif // MAINWINDOW_H

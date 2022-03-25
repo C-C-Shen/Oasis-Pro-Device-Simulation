@@ -33,3 +33,16 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    icons/confirm.png \
+    icons/down.png \
+    icons/power.png \
+    icons/up.png \
+    res/icons/confirm.png \
+    res/icons/down.png \
+    res/icons/power.png \
+    res/icons/up.png
+
+RESOURCES += \
+    resources/images.qrc

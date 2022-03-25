@@ -1,0 +1,30 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/confirm.png</file>
+        <file>icons/down.png</file>
+        <file>icons/power.png</file>
+        <file>icons/up.png</file>
+        <file>icons/20min_off.png</file>
+        <file>icons/20min_on.png</file>
+        <file>icons/45min_off.png</file>
+        <file>icons/45min_on.png</file>
+        <file>icons/alpha_off.png</file>
+        <file>icons/alpha_on.png</file>
+        <file>icons/delta_off.png</file>
+        <file>icons/delta_on.png</file>
+        <file>icons/dutyCES_off.png</file>
+        <file>icons/dutyCES_on.png</file>
+        <file>icons/shortCES_off.png</file>
+        <file>icons/shortCES_on.png</file>
+        <file>icons/theta_off.png</file>
+        <file>icons/theta_on.png</file>
+        <file>icons/userdesigned_off.png</file>
+        <file>icons/userdesigned_on.png</file>
+        <file>icons/L_off.png</file>
+        <file>icons/L_on.png</file>
+        <file>icons/R_off.png</file>
+        <file>icons/R_on.png</file>
+        <file>icons/subdelta_off.png</file>
+        <file>icons/subdelta_on.png</file>
+    </qresource>
+</RCC>
