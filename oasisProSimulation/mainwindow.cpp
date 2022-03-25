@@ -197,7 +197,7 @@ void MainWindow::handlePowerOff()
         sessionTypeLabel[i]->setPixmap(sessionType_off[i]);
     }
     for (std::size_t i = 0; i < sessionNumLabel.size(); i++) {
-        sessionNumLabel[i]->setPixmap(sessionNum_off);
+        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
     }
 
     ui->ledLabel->setStyleSheet("background-color:white");
