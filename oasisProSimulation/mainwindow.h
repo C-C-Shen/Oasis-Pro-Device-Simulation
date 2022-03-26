@@ -36,8 +36,9 @@ class MainWindow : public QMainWindow
         int typePosition = 0;
 
         QElapsedTimer elapsedTimer;
+        QElapsedTimer elapsedTimerConfirm;        //For the Confirm Button to save or start session
         Ui::MainWindow *ui;
-        QTimer currentSessionTimer; // timer that calls timeout() to reduce battery level and check if session time is up
+        QTimer* currentSessionTimer; // timer that calls timeout() to reduce battery level and check if session time is up
         Session* currentSession; // current session being used
         std::vector<Session*> sessions; // all possible sessions
 
@@ -83,9 +84,6 @@ class MainWindow : public QMainWindow
         /// Handle power off
         void handlePowerOff();
 
-        /// Deplete batteryLvl by a variable level depending on length, intensity, and skin connection
-        void depleteBattery();
-
         /// Display the current battery level using session number labels
         void displayBatteryLevel();
 
@@ -113,6 +111,9 @@ class MainWindow : public QMainWindow
         /// Switch between different session types
         void switchType(int direction);
 
+        /// Starts Timer and Calls depleteBattery();
+        void initializeTimer();
+
     private slots:
         // button handling
         void powerButtonPress();
@@ -127,5 +128,10 @@ class MainWindow : public QMainWindow
         void upButtonPress();
         void downButtonPress();
         void confirmButtonPress();
+        void confirmButtonRelease();
+
+        /// Deplete batteryLvl by a variable level depending on length, intensity, and skin connection
+        /// Here for now, needs to be a slot for timeout
+        void depleteBattery();
 };
 #endif // MAINWINDOW_H

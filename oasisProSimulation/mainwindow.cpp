@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->upButton, SIGNAL(pressed()), this, SLOT(upButtonPress()));
     connect(ui->downButton, SIGNAL(pressed()), this, SLOT(downButtonPress()));
     connect(ui->confirmButton, SIGNAL(pressed()), this, SLOT(confirmButtonPress()));
+    connect(ui->confirmButton, SIGNAL(released()), this, SLOT(confirmButtonRelease()));
 
     // Initializing vector pixmaps
     sessionLength_on.push_back(QPixmap(":/icons/20min_on.png"));
@@ -89,8 +90,10 @@ MainWindow::MainWindow(QWidget *parent)
     powerOn = false;
     skinConnection = false;
     batteryLvl = 100.00;
-    intensityLvl = 0;
+    intensityLvl = 1;
     sessionLength = 0;
+    currentSessionTimer = new QTimer(this);
+    currentSession = NULL;
 }
 
 MainWindow::~MainWindow()
@@ -139,6 +142,18 @@ void MainWindow::connectToSkin()
 {
     skinConnection = !skinConnection;
     std::cout << "Skin connection: " << skinConnection << std::endl;
+
+    //Pause timer
+    if (currentSessionTimer->isActive() && currentSession !=NULL){
+        if(!skinConnection){
+            currentSessionTimer->stop();
+        }
+    }
+    if (!currentSessionTimer->isActive() && currentSession !=NULL){
+        if(skinConnection){
+            currentSessionTimer->start(1000);
+        }
+    }
 }
 
 void MainWindow::upButtonPress()
@@ -166,9 +181,81 @@ void MainWindow::downButtonPress()
 void MainWindow::confirmButtonPress()
 {
     // TODO: add handling
-    if (powerOn)
+    if (powerOn )
     {
-        std::cout << "Confirm button pressed" << std::endl;
+        this->elapsedTimerConfirm.start();
+    }
+}
+
+void MainWindow::confirmButtonRelease() {
+    int elapsed = this->elapsedTimerConfirm.elapsed();
+
+    if(!powerOn)
+           return;
+
+    if(currentSession!=NULL)
+            return;
+
+    if (elapsed >= 2000) {
+        //TODO: Long Press to switch to save mode later on
+
+        std::cout << "Long Confirm Pressed" << std::endl;
+
+    } else if (powerOn) {
+        std::cout << "Normal Press" << std::endl;
+        // TODO: Start therapy
+        //testing battery depletion, can remove
+        Session* s = new Session("25","10");
+        startSession(s);
+
+    } else {
+        std::cout << "Turn on device" << std::endl;
+    }
+}
+
+void MainWindow::startSession(Session *s)
+{
+
+    //a test session created in confirmButtonRelase()
+
+
+    //Initial connection test, see manual for more functionality
+    if(skinConnection){
+        initializeTimer();
+        currentSession = s;
+        std::cout << "Session Start" << std::endl;
+    }
+    else
+        std::cout << "sKiN iS dETaCheD" << std::endl;
+}
+
+void MainWindow::endSession()
+{
+    std::cout << "Session End" << std::endl;
+}
+
+
+void MainWindow::initializeTimer()
+{
+    connect (currentSessionTimer, SIGNAL(timeout()), this, SLOT(depleteBattery()));
+    if(skinConnection){
+        currentSessionTimer->start(1000);
+    }
+}
+
+void MainWindow::depleteBattery(){
+    batteryLvl-=1;
+    std::cout << "Battery Level: "<<batteryLvl << std::endl;
+}
+
+void MainWindow::displayBatteryLevel() {
+    int levelToDisplay = (batteryLvl * 0.8)/10; // convert battery level to be out of 8 instead of 100, since we have 8 lights to show level
+    std::cout << levelToDisplay << std::endl;
+    for (int i = 0; i < levelToDisplay; i++) {
+        sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
+    }
+    for (std::size_t i = levelToDisplay; i < sessionNumLabel.size(); i++) {
+        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
     }
 }
 
@@ -190,6 +277,11 @@ void MainWindow::handlePowerOn()
 
 void MainWindow::handlePowerOff()
 {
+
+    //pause timer
+    currentSessionTimer->stop();
+
+    //update interface
     for (std::size_t i = 0; i < sessionLengthLabel.size(); i++) {
         sessionLengthLabel[i]->setPixmap(sessionLength_off[i]);
     }
@@ -205,17 +297,6 @@ void MainWindow::handlePowerOff()
     ui->cesRightLabel->setPixmap(R_off);
     ui->cesShortLabel->setPixmap(shortCES_off);
     ui->cesDutyLabel->setPixmap(dutyCES_off);
-}
-
-void MainWindow::displayBatteryLevel() {
-    int levelToDisplay = (batteryLvl * 0.8)/10; // convert battery level to be out of 8 instead of 100, since we have 8 lights to show level
-    std::cout << levelToDisplay << std::endl;
-    for (int i = 0; i < levelToDisplay; i++) {
-        sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
-    }
-    for (std::size_t i = levelToDisplay; i < sessionNumLabel.size(); i++) {
-        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
-    }
 }
 
 void MainWindow::switchGroups() {
@@ -247,3 +328,4 @@ void MainWindow::switchType(int direction) {
     // turn "on" selected type label
     sessionTypeLabel[typePosition]->setPixmap(sessionType_on[typePosition]);
 }
+
