@@ -60,7 +60,7 @@ MainWindow::MainWindow(QWidget *parent)
     sessionNum_on.push_back("QLabel { color: #ff0000 }");
     sessionNum_off = "QLabel { color: #000000 }";
 
-    // TODO: need to inicialize the sessionNumLabel and sessionStimLabel to appropriate QPixmap
+    // TODO: need to initialize the sessionStimLabel to appropriate QPixmap/Colors
 
     // Initialize UI label vector pointers
     sessionLengthLabel.push_back(ui->sessionLength20);
@@ -273,6 +273,10 @@ void MainWindow::depleteBattery(){
 
 void MainWindow::displayBatteryLevel() {
     int levelToDisplay = (batteryLvl * 0.8)/10; // convert battery level to be out of 8 instead of 100, since we have 8 lights to show level
+    // needed since otherwise when battery below ~12% it would otherwise show no bars
+    if (levelToDisplay < 1) {
+        levelToDisplay = 1;
+    }
     std::cout << levelToDisplay << std::endl;
     for (int i = 0; i < levelToDisplay; i++) {
         sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
