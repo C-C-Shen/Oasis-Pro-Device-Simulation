@@ -27,6 +27,7 @@ class MainWindow : public QMainWindow
         // variables
         bool powerOn;
         bool skinConnection;
+        bool connectionButtonsLit;
         double batteryLvl; // battery level ranging from 0-100
         int intensityLvl; // current session intensity level
         int sessionLength; // total current session length (in minutes)
@@ -39,6 +40,7 @@ class MainWindow : public QMainWindow
         QElapsedTimer elapsedTimerConfirm;        //For the Confirm Button to save or start session
         Ui::MainWindow *ui;
         QTimer* currentSessionTimer; // timer that calls timeout() to reduce battery level and check if session time is up
+        QTimer* noConnectionTimer;
         Session* currentSession; // current session being used
         std::vector<Session*> sessions; // all possible sessions
 
@@ -103,7 +105,7 @@ class MainWindow : public QMainWindow
         void adjustIntensity(int newIntensity);
 
         /// Perform connection test
-        void testConnection();
+        bool testConnection();
 
         /// Switch between different session groups (ie, lengths)
         void switchGroups();
@@ -133,5 +135,8 @@ class MainWindow : public QMainWindow
         /// Deplete batteryLvl by a variable level depending on length, intensity, and skin connection
         /// Here for now, needs to be a slot for timeout
         void depleteBattery();
+
+        /// Handles connection status blinking
+        void flashConnection();
 };
 #endif // MAINWINDOW_H

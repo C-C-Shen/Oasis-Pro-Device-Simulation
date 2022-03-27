@@ -1,11 +1,25 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <stdlib.h>
+#include <time.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    srand(time(NULL));
+
+    // Initializing variables
+    powerOn = false;
+    skinConnection = false;
+    connectionButtonsLit = false;
+    batteryLvl = 100.00;
+    intensityLvl = 1;
+    sessionLength = 0;
+    currentSessionTimer = new QTimer(this);
+    noConnectionTimer = new QTimer(this);
+    currentSession = NULL;
 
     // Initializing connections
     connect(ui->powerButton, SIGNAL(pressed()), this, SLOT(powerButtonPress()));
@@ -16,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->downButton, SIGNAL(pressed()), this, SLOT(downButtonPress()));
     connect(ui->confirmButton, SIGNAL(pressed()), this, SLOT(confirmButtonPress()));
     connect(ui->confirmButton, SIGNAL(released()), this, SLOT(confirmButtonRelease()));
+    connect(noConnectionTimer, SIGNAL(timeout()), this, SLOT(flashConnection()));
+    connect(currentSessionTimer, SIGNAL(timeout()), this, SLOT(depleteBattery()));
 
     // Initializing vector pixmaps
     sessionLength_on.push_back(QPixmap(":/icons/20min_on.png"));
@@ -43,7 +59,6 @@ MainWindow::MainWindow(QWidget *parent)
     sessionNum_on.push_back("QLabel { color: #ff0000 }");
     sessionNum_on.push_back("QLabel { color: #ff0000 }");
     sessionNum_off = "QLabel { color: #000000 }";
-
 
     // TODO: need to inicialize the sessionNumLabel and sessionStimLabel to appropriate QPixmap
 
@@ -85,15 +100,6 @@ MainWindow::MainWindow(QWidget *parent)
     dutyCES_off = QPixmap(":/icons/dutyCES_off.png");
     shortCES_on = QPixmap(":/icons/shortCES_on.png");
     shortCES_off = QPixmap(":/icons/shortCES_off.png");
-
-    // Initializing variables
-    powerOn = false;
-    skinConnection = false;
-    batteryLvl = 100.00;
-    intensityLvl = 1;
-    sessionLength = 0;
-    currentSessionTimer = new QTimer(this);
-    currentSession = NULL;
 }
 
 MainWindow::~MainWindow()
@@ -115,6 +121,7 @@ void MainWindow::powerButtonRelease() {
         if (this->powerOn) {
             std::cout << "Powering Off" << std::endl;
             this->powerOn = false;
+            currentSession = NULL;
             handlePowerOff();
         } else {
             std::cout << "Powering On" << std::endl;
@@ -144,12 +151,12 @@ void MainWindow::connectToSkin()
     std::cout << "Skin connection: " << skinConnection << std::endl;
 
     //Pause timer
-    if (currentSessionTimer->isActive() && currentSession !=NULL){
+    if (currentSessionTimer->isActive() && currentSession != NULL){
         if(!skinConnection){
             currentSessionTimer->stop();
         }
     }
-    if (!currentSessionTimer->isActive() && currentSession !=NULL){
+    if (!currentSessionTimer->isActive() && currentSession != NULL){
         if(skinConnection){
             currentSessionTimer->start(1000);
         }
@@ -158,30 +165,41 @@ void MainWindow::connectToSkin()
 
 void MainWindow::upButtonPress()
 {
-    // TODO: add handling
     if (powerOn)
     {
         std::cout << "Up button pressed" << std::endl;
-        // TODO: add check to see what device state is in
-        switchType(1);
+
+        if (currentSession != NULL)
+        {
+            // TODO: adjust intensity
+        }
+        else
+        {
+            switchType(1);
+        }
     }
 }
 
 void MainWindow::downButtonPress()
 {
-    // TODO: add handling
     if (powerOn)
     {
         std::cout << "Down button pressed" << std::endl;
-        // TODO: add check to see what device state is in
-        switchType(-1);
+
+        if (currentSession != NULL)
+        {
+            // TODO: adjust intensity
+        }
+        else
+        {
+            switchType(-1);
+        }
     }
 }
 
 void MainWindow::confirmButtonPress()
 {
-    // TODO: add handling
-    if (powerOn )
+    if (powerOn)
     {
         this->elapsedTimerConfirm.start();
     }
@@ -190,10 +208,10 @@ void MainWindow::confirmButtonPress()
 void MainWindow::confirmButtonRelease() {
     int elapsed = this->elapsedTimerConfirm.elapsed();
 
-    if(!powerOn)
+    if (!powerOn)
            return;
 
-    if(currentSession!=NULL)
+    if (currentSession != NULL)
             return;
 
     if (elapsed >= 2000) {
@@ -203,7 +221,6 @@ void MainWindow::confirmButtonRelease() {
 
     } else if (powerOn) {
         std::cout << "Normal Press" << std::endl;
-        // TODO: Start therapy
         //testing battery depletion, can remove
         Session* s = new Session("25","10");
         startSession(s);
@@ -215,18 +232,20 @@ void MainWindow::confirmButtonRelease() {
 
 void MainWindow::startSession(Session *s)
 {
-
     //a test session created in confirmButtonRelase()
 
-
     //Initial connection test, see manual for more functionality
-    if(skinConnection){
+
+    if(testConnection())
+    {
         initializeTimer();
         currentSession = s;
         std::cout << "Session Start" << std::endl;
     }
     else
+    {
         std::cout << "sKiN iS dETaCheD" << std::endl;
+    }
 }
 
 void MainWindow::endSession()
@@ -237,7 +256,6 @@ void MainWindow::endSession()
 
 void MainWindow::initializeTimer()
 {
-    connect (currentSessionTimer, SIGNAL(timeout()), this, SLOT(depleteBattery()));
     if(skinConnection){
         currentSessionTimer->start(1000);
     }
@@ -263,6 +281,7 @@ void MainWindow::handlePowerOn()
 {
     // display device power level
     displayBatteryLevel();
+
     // light up default value labels
     sessionLengthLabel[0]->setPixmap(sessionLength_on[0]);
     sessionTypeLabel[0]->setPixmap(sessionType_on[0]);
@@ -277,7 +296,6 @@ void MainWindow::handlePowerOn()
 
 void MainWindow::handlePowerOff()
 {
-
     //pause timer
     currentSessionTimer->stop();
 
@@ -329,3 +347,73 @@ void MainWindow::switchType(int direction) {
     sessionTypeLabel[typePosition]->setPixmap(sessionType_on[typePosition]);
 }
 
+bool MainWindow::testConnection()
+{
+    // TODO: implement CES mode light blinking
+    for (int i = 0; i < (int)sessionNumLabel.size(); i++)
+    {
+        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
+    }
+
+    if (skinConnection)
+    {
+        // randomize either okay or excellent connection
+        if ((rand() % 2) == 1)
+        {
+            // excellent connection
+            sessionNumLabel[0]->setStyleSheet(sessionNum_on[0]);
+            sessionNumLabel[1]->setStyleSheet(sessionNum_on[1]);
+            sessionNumLabel[2]->setStyleSheet(sessionNum_on[2]);
+        }
+        else
+        {
+            // okay connection
+            sessionNumLabel[3]->setStyleSheet(sessionNum_on[3]);
+            sessionNumLabel[4]->setStyleSheet(sessionNum_on[4]);
+            sessionNumLabel[5]->setStyleSheet(sessionNum_on[5]);
+        }
+
+        return true;
+    }
+    else
+    {
+        // no connection
+        noConnectionTimer->start(1000);
+        return false;
+    }
+}
+
+void MainWindow::flashConnection()
+{
+    // TODO: implement graph scrolling up/down after some seconds?
+
+    // stop timer if power is turned off
+    if (!powerOn)
+    {
+        noConnectionTimer->stop();
+        connectionButtonsLit = false;
+        return;
+    }
+    else if (skinConnection)
+    {
+        noConnectionTimer->stop();
+        connectionButtonsLit = false;
+        // start session if skin is connected
+        startSession(currentSession);
+        return;
+    }
+
+    // flash connection
+    if (connectionButtonsLit)
+    {
+        sessionNumLabel[6]->setStyleSheet(sessionNum_off);
+        sessionNumLabel[7]->setStyleSheet(sessionNum_off);
+    }
+    else
+    {
+        sessionNumLabel[6]->setStyleSheet(sessionNum_on[6]);
+        sessionNumLabel[7]->setStyleSheet(sessionNum_on[7]);
+    }
+
+    connectionButtonsLit = !connectionButtonsLit;
+}
