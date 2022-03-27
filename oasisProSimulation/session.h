@@ -2,6 +2,7 @@
 #define SESSION_H
 
 #include <QString>
+#include <iostream>
 
 class Session
 {

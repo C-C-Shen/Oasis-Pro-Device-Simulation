@@ -21,7 +21,7 @@ QString Session::getFrequency()
 
 int Session::getIntensity()
 {
-    return intensity
+    return intensity;
 }
 
 void Session::setIntensity(int intense)
