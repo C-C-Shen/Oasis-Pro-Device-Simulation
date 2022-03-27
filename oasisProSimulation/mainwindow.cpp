@@ -121,9 +121,8 @@ void MainWindow::powerButtonRelease() {
         if (this->powerOn) {
             std::cout << "Powering Off" << std::endl;
             this->powerOn = false;
-            currentSession = NULL;
             handlePowerOff();
-        } else {
+        } else if (batteryLvl > 0) {
             std::cout << "Powering On" << std::endl;
             this->powerOn = true;
             handlePowerOn();
@@ -262,8 +261,14 @@ void MainWindow::initializeTimer()
 }
 
 void MainWindow::depleteBattery(){
-    batteryLvl-=1;
-    std::cout << "Battery Level: "<<batteryLvl << std::endl;
+    batteryLvl -= 1;
+    std::cout << "Battery Level: "<< batteryLvl << std::endl;
+
+    if (batteryLvl == 0)
+    {
+        powerOn = false;
+        handlePowerOff();
+    }
 }
 
 void MainWindow::displayBatteryLevel() {
@@ -298,6 +303,9 @@ void MainWindow::handlePowerOff()
 {
     //pause timer
     currentSessionTimer->stop();
+
+    // remove current session
+    currentSession = NULL;
 
     //update interface
     for (std::size_t i = 0; i < sessionLengthLabel.size(); i++) {
