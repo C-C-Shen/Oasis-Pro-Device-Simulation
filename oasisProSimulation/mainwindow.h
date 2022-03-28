@@ -5,6 +5,9 @@
 #include <QLabel>
 #include <QTimer>
 #include <QElapsedTimer>
+#include <QString>
+#include <QVector>
+#include <QPair>
 #include <iostream>
 #include <vector>
 
@@ -32,6 +35,8 @@ class MainWindow : public QMainWindow
         int intensityLvl; // current session intensity level
         int sessionLength; // total current session length (in minutes)
 
+        // TODO: currentState -> track device state, (0 = just powered on, 1 = session running, etc), more may be needed later
+
         // variables holding specific positions for vectors
         int lengthPosition = 0;
         int typePosition = 0;
@@ -42,7 +47,15 @@ class MainWindow : public QMainWindow
         QTimer* currentSessionTimer; // timer that calls timeout() to reduce battery level and check if session time is up
         QTimer* noConnectionTimer;
         Session* currentSession; // current session being used
-        std::vector<Session*> sessions; // all possible sessions
+
+        // vector of pairs of strings to session pointer vectors
+        /* General Structure
+         * Outer vector stores pairs, 0 = "20" pair, 1 = "45" pair, 2 = "User" pair
+         * Each pair associates a group type to a vector of sessions with that group type (ie, "20", "45", "User")
+         * Inner vector stores pointers to sessions within the pairs
+         * In this case, sessions found under "20" and "45" are the pre-defined default sessions, "User" is empty to start
+         */
+        QVector<QPair<QString, QVector<Session *>>> sessions; // all possible sessions
 
         // vector of QLabel objects, to help iterate over which to turn on and off
         std::vector<QLabel *> sessionLengthLabel;
@@ -88,6 +101,9 @@ class MainWindow : public QMainWindow
 
         /// Display the current battery level using session number labels
         void displayBatteryLevel();
+
+        /// Light up session numbers that have available sessions to select
+        void displaySessionSelect();
 
         /// Notify user when batteryLvl is low
         void onBatteryLow();

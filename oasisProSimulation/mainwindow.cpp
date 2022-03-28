@@ -33,6 +33,21 @@ MainWindow::MainWindow(QWidget *parent)
     connect(noConnectionTimer, SIGNAL(timeout()), this, SLOT(flashConnection()));
     connect(currentSessionTimer, SIGNAL(timeout()), this, SLOT(depleteBattery()));
 
+    // Initialize default sessions
+    QVector<QString> g = {"20", "45", "User"}; // lengths are actually just groups
+    QVector<QString> f = {"1.75", "3.75", "7", "10"}; // types are actually just sessions (sub delta, delta, etc)
+
+    // -1 since last group is user defined, which will be given nothing seperatly
+    for (int i = 0; i < g.size() - 1; i++) {
+        QVector<Session *> newVector;
+        for (int j = 0 ; j < f.size(); j++) {
+            Session *newS = new Session(g[i],f[j],0);
+            newVector.push_back(newS);
+        }
+        QPair<QString, QVector<Session *>> newPair = qMakePair(g[i],newVector);
+        sessions.push_back(newPair);
+    }
+
     // Initializing vector pixmaps
     sessionLength_on.push_back(QPixmap(":/icons/20min_on.png"));
     sessionLength_on.push_back(QPixmap(":/icons/45min_on.png"));
@@ -126,12 +141,14 @@ void MainWindow::powerButtonRelease() {
             std::cout << "Powering On" << std::endl;
             this->powerOn = true;
             handlePowerOn();
+            displaySessionSelect();
         }
         std::cout << "Device power state: " << this->powerOn << std::endl;
     } else if (this->powerOn) {
         std::cout << "Normal Press" << std::endl;
         // TODO: call function relating to a simple press
         switchGroups();
+        displaySessionSelect();
     } else {
         // this is just here for testing purpose, can be removed later
         std::cout << "Long press to turn on" << std::endl;
@@ -198,13 +215,15 @@ void MainWindow::downButtonPress()
 
 void MainWindow::confirmButtonPress()
 {
+    // TODO: long press should save current intensity value to the session being run
     if (powerOn)
     {
         this->elapsedTimerConfirm.start();
     }
 }
 
-void MainWindow::confirmButtonRelease() {
+void MainWindow::confirmButtonRelease()
+{
     int elapsed = this->elapsedTimerConfirm.elapsed();
 
     if (!powerOn)
@@ -221,7 +240,24 @@ void MainWindow::confirmButtonRelease() {
     } else if (powerOn) {
         std::cout << "Normal Press" << std::endl;
         //testing battery depletion, can remove
-        Session* s = new Session("25","10");
+        QString setLen;
+        QString setFreq;
+        int setInt;
+        // 0, 1 mean pre-defined groups
+        if (lengthPosition != 2) {
+            std::cout << lengthPosition << " " << typePosition << std::endl;
+            setLen = sessions[lengthPosition].second[typePosition]->getSessionLength();
+            setFreq = sessions[lengthPosition].second[typePosition]->getFrequency();
+            setInt = sessions[lengthPosition].second[typePosition]->getIntensity();
+        } else {
+            // TODO: select user defined session
+            // these are place holder values for now
+            setLen = "20";
+            setFreq = "5";
+            setInt = 0;
+        }
+        Session* s = new Session(setLen,setFreq,setInt);
+        intensityLvl = 0; // as specified in manual, intensity will always start at 0
         startSession(s);
 
     } else {
@@ -260,7 +296,8 @@ void MainWindow::initializeTimer()
     }
 }
 
-void MainWindow::depleteBattery(){
+void MainWindow::depleteBattery()
+{
     batteryLvl -= 1;
     std::cout << "Battery Level: "<< batteryLvl << std::endl;
 
@@ -271,19 +308,37 @@ void MainWindow::depleteBattery(){
     }
 }
 
-void MainWindow::displayBatteryLevel() {
+void MainWindow::displayBatteryLevel()
+{
     int levelToDisplay = (batteryLvl * 0.8)/10; // convert battery level to be out of 8 instead of 100, since we have 8 lights to show level
     // needed since otherwise when battery below ~12% it would otherwise show no bars
     if (levelToDisplay < 1) {
         levelToDisplay = 1;
     }
-    std::cout << levelToDisplay << std::endl;
+    // std::cout << levelToDisplay << std::endl;
     for (int i = 0; i < levelToDisplay; i++) {
         sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
     }
     for (std::size_t i = levelToDisplay; i < sessionNumLabel.size(); i++) {
         sessionNumLabel[i]->setStyleSheet(sessionNum_off);
     }
+}
+
+void MainWindow::displaySessionSelect()
+{
+    int availableToSelect = 0;
+    // if user defined sessions is empty, sessions.size() will possibly be 1 less than lengthPosition
+    if (sessions.size() > lengthPosition) {
+        availableToSelect = sessions[lengthPosition].second.size();
+    }
+    for (int i = 0; i < availableToSelect; i++) {
+        sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
+    }
+    for (std::size_t i = availableToSelect; i < 8; i++) {
+        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
+    }
+
+    // TODO: on selecting a session, flash the number to indicate selection before confirmation
 }
 
 void MainWindow::handlePowerOn()
