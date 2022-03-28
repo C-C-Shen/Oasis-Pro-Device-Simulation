@@ -1,17 +1,17 @@
 #include "session.h"
 
-Session::Session(QString sType, QString freq, int intense)
+Session::Session(QString sLength, QString freq, int intense)
 {
-    type = sType;
+    length = sLength;
     frequency = freq;
     intensity = intense;
 }
 
 Session::~Session(){}
 
-QString Session::getSessionType()
+QString Session::getSessionLength()
 {
-    return type;
+    return length;
 }
 
 QString Session::getFrequency()
