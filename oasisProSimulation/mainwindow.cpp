@@ -14,13 +14,14 @@ MainWindow::MainWindow(QWidget *parent)
     powerOn = false;
     skinConnection = false;
     connectionButtonsLit = false;
+    badConnection = false;
     batteryLvl = 100.00;
     intensityLvl = 0.0;
     sessionLength = 0;
     currentSessionTimer = new QTimer(this);
-    noConnectionTimer = new QTimer(this);
+    testConnectionTimer = new QTimer(this);
     currentSession = NULL;
-    elaspedTime =0;
+    elaspedTime = 0;
 
     // Initializing connections
     connect(ui->powerButton, SIGNAL(pressed()), this, SLOT(powerButtonPress()));
@@ -31,7 +32,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->downButton, SIGNAL(pressed()), this, SLOT(downButtonPress()));
     connect(ui->confirmButton, SIGNAL(pressed()), this, SLOT(confirmButtonPress()));
     connect(ui->confirmButton, SIGNAL(released()), this, SLOT(confirmButtonRelease()));
-    connect(noConnectionTimer, SIGNAL(timeout()), this, SLOT(flashConnection()));
+    connect(ui->recordButton, SIGNAL(pressed()), this, SLOT(recordButtonPress()));
+    connect(ui->loadUserDesignedButton, SIGNAL(pressed()), this, SLOT(loadUserDesignedButtonPress()));
+    connect(testConnectionTimer, SIGNAL(timeout()), this, SLOT(flashConnection()));
     connect(currentSessionTimer, SIGNAL(timeout()), this, SLOT(depleteBattery()));
 
     // Initialize default sessions
@@ -75,8 +78,6 @@ MainWindow::MainWindow(QWidget *parent)
     sessionNum_on.push_back("QLabel { color: #ff0000 }");
     sessionNum_on.push_back("QLabel { color: #ff0000 }");
     sessionNum_off = "QLabel { color: #000000 }";
-
-    // TODO: need to initialize the sessionStimLabel to appropriate QPixmap/Colors
 
     // Initialize UI label vector pointers
     sessionLengthLabel.push_back(ui->sessionLength20);
@@ -131,8 +132,6 @@ void MainWindow::powerButtonRelease() {
     int elapsed = this->elapsedTimer.elapsed();
     // for now, "long" press is anything over 2 seconds
     if (elapsed >= 2000) {
-        // TODO: is there any other "long" press functionality needed for power button?
-
         // toggle device power
         if (this->powerOn) {
             std::cout << "Powering Off" << std::endl;
@@ -145,9 +144,8 @@ void MainWindow::powerButtonRelease() {
             displaySessionSelect();
         }
         std::cout << "Device power state: " << this->powerOn << std::endl;
-    } else if (this->powerOn) {
+    } else if (this->powerOn && !testConnectionTimer->isActive()) {
         std::cout << "Normal Press" << std::endl;
-        // TODO: call function relating to a simple press
         switchGroups();
         displaySessionSelect();
     } else {
@@ -182,7 +180,7 @@ void MainWindow::connectToSkin()
 
 void MainWindow::upButtonPress()
 {
-    if (powerOn)
+    if (powerOn && !testConnectionTimer->isActive())
     {
         std::cout << "Up button pressed" << std::endl;
 
@@ -204,11 +202,11 @@ void MainWindow::upButtonPress()
 
 void MainWindow::downButtonPress()
 {
-    if (powerOn)
+    if (powerOn && !testConnectionTimer->isActive())
     {
         std::cout << "Down button pressed" << std::endl;
 
-        if (currentSession != NULL)
+        if (currentSession != NULL && !testConnectionTimer->isActive())
         {
             if(intensityLvl>0)
                 intensityLvl -=0.5;
@@ -278,21 +276,35 @@ void MainWindow::confirmButtonRelease()
     }
 }
 
+void MainWindow::recordButtonPress()
+{
+    // TODO: implement recording
+    std::cout << "Record button pressed" << std::endl;
+
+    if (currentSession != NULL)
+    {
+        std::cout << "Recorded session - freq: " << currentSession->getFrequency().toStdString() << ", intensity: " << intensityLvl << ", length: " << currentSession->getSessionLength().toStdString() << std::endl;
+    }
+    else
+    {
+        std::cout << "No session to record" << std::endl;
+    }
+}
+
+void MainWindow::loadUserDesignedButtonPress()
+{
+    std::cout << "Load user designed button pressed" << std::endl;
+}
+
 void MainWindow::startSession(Session *s)
 {
     //a test session created in confirmButtonRelase()
 
     //Initial connection test, see manual for more functionality
 
-    if(testConnection())
+    if (testConnection())
     {
         currentSession->print();
-        initializeTimer();
-        std::cout << "Session Start" << std::endl;
-    }
-    else
-    {
-        std::cout << "sKiN iS dETaCheD" << std::endl;
     }
 }
 
@@ -300,7 +312,6 @@ void MainWindow::endSession()
 {
     std::cout << "Session End" << std::endl;
 }
-
 
 void MainWindow::initializeTimer()
 {
@@ -311,9 +322,9 @@ void MainWindow::initializeTimer()
 
 void MainWindow::depleteBattery()
 {
-    elaspedTime +=1;
+    elaspedTime += 1;
     batteryLvl -= 1;
-    std::cout << "Battery Level: "<< batteryLvl << std::endl;
+    std::cout << "Battery Level: " << batteryLvl << std::endl;
 
     if (batteryLvl == 0)
     {
@@ -321,11 +332,14 @@ void MainWindow::depleteBattery()
         handlePowerOff();
     }
 
-    if (elaspedTime%5 ==0){
+    if ((elaspedTime % 5) == 0)
+    {
         displayBatteryLevel();
     }
     else
+    {
         displayIntensityLevel();
+    }
 
 }
 
@@ -347,8 +361,7 @@ void MainWindow::displayBatteryLevel()
 
 void MainWindow::displayIntensityLevel()
 {
-    int levelToDisplay = floor(intensityLvl); // convert battery level to be out of 8 instead of 100, since we have 8 lights to show level
-    // needed since otherwise when battery below ~12% it would otherwise show no bars
+    int levelToDisplay = floor(intensityLvl); // round intensity level down (6.5 displays 6, 5.5, displays 5, etc.)
 
     for (int i = 0; i < levelToDisplay; i++) {
         sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
@@ -384,12 +397,7 @@ void MainWindow::handlePowerOn()
     sessionLengthLabel[0]->setPixmap(sessionLength_on[0]);
     sessionTypeLabel[0]->setPixmap(sessionType_on[0]);
 
-    // TODO: might want to find a way to turn LED on after 2 secs have passed (before button is let go) since that's what they have in the demo
     ui->ledLabel->setStyleSheet("background-color:green");
-    ui->cesLeftLabel->setPixmap(L_on);
-    ui->cesRightLabel->setPixmap(R_on);
-    ui->cesShortLabel->setPixmap(shortCES_on);
-    ui->cesDutyLabel->setPixmap(dutyCES_on);
 }
 
 void MainWindow::handlePowerOff()
@@ -450,7 +458,10 @@ void MainWindow::switchType(int direction) {
 
 bool MainWindow::testConnection()
 {
-    // TODO: implement CES mode light blinking
+    // Start connection test and end it after 5 seconds
+    testConnectionTimer->start(1000);
+    testConnectionTimer->singleShot(5000, this, SLOT(stopConnectionTest()));
+
     for (int i = 0; i < (int)sessionNumLabel.size(); i++)
     {
         sessionNumLabel[i]->setStyleSheet(sessionNum_off);
@@ -458,7 +469,7 @@ bool MainWindow::testConnection()
 
     if (skinConnection)
     {
-        // randomize either okay or excellent connection
+        // randomize either okay or excellent connection if skin is connected
         if ((rand() % 2) == 1)
         {
             // excellent connection
@@ -474,49 +485,80 @@ bool MainWindow::testConnection()
             sessionNumLabel[5]->setStyleSheet(sessionNum_on[5]);
         }
 
+        badConnection = false;
         return true;
     }
     else
     {
         // no connection
-        noConnectionTimer->start(1000);
+        badConnection = true;
         return false;
     }
 }
 
 void MainWindow::flashConnection()
-{
-    // TODO: implement graph scrolling up/down after some seconds?
-
+{   
     // stop timer if power is turned off
     if (!powerOn)
     {
-        noConnectionTimer->stop();
+        testConnectionTimer->stop();
         connectionButtonsLit = false;
-        return;
-    }
-    else if (skinConnection)
-    {
-        noConnectionTimer->stop();
-        connectionButtonsLit = false;
-        // start session if skin is connected
-
-        //Sending in test session so currentSession isnt null
-        startSession(currentSession);
+        badConnection = false;
         return;
     }
 
-    // flash connection
-    if (connectionButtonsLit)
+    QString tempFreq = currentSession->getFrequency();
+
+    // Flash duty or short CES depending on the select session
+    if (tempFreq == "1.75")
     {
-        sessionNumLabel[6]->setStyleSheet(sessionNum_off);
-        sessionNumLabel[7]->setStyleSheet(sessionNum_off);
+        if (connectionButtonsLit)
+        {
+            ui->cesDutyLabel->setPixmap(dutyCES_off);
+        }
+        else
+        {
+            ui->cesDutyLabel->setPixmap(dutyCES_on);
+        }
     }
     else
     {
-        sessionNumLabel[6]->setStyleSheet(sessionNum_on[6]);
-        sessionNumLabel[7]->setStyleSheet(sessionNum_on[7]);
+        if (connectionButtonsLit)
+        {
+            ui->cesShortLabel->setPixmap(shortCES_off);
+        }
+        else
+        {
+            ui->cesShortLabel->setPixmap(shortCES_on);
+        }
+    }
+
+    if (badConnection)
+    {
+        // flash bad connection on/off
+        if (connectionButtonsLit)
+        {
+            sessionNumLabel[6]->setStyleSheet(sessionNum_off);
+            sessionNumLabel[7]->setStyleSheet(sessionNum_off);
+        }
+        else
+        {
+            sessionNumLabel[6]->setStyleSheet(sessionNum_on[6]);
+            sessionNumLabel[7]->setStyleSheet(sessionNum_on[7]);
+        }
     }
 
     connectionButtonsLit = !connectionButtonsLit;
+}
+
+void MainWindow::stopConnectionTest()
+{
+    // Stop connection test, reset vars, and attempt to initialize timer
+    testConnectionTimer->stop();
+    connectionButtonsLit = false;
+    ui->cesDutyLabel->setPixmap(dutyCES_off);
+    ui->cesShortLabel->setPixmap(shortCES_off);
+
+    displayIntensityLevel();
+    initializeTimer();
 }
