@@ -1,7 +1,9 @@
 # COMP3004 Team 33
 ## Team Members
 - Gurpiar Brar
-  - TODO
+  - Battery Stuff
+  - Intensity Stuff
+  - Documentation
 - Kayla Gingras
   - UI
   - Documentation
