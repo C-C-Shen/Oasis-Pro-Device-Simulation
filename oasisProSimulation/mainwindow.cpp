@@ -15,11 +15,12 @@ MainWindow::MainWindow(QWidget *parent)
     skinConnection = false;
     connectionButtonsLit = false;
     batteryLvl = 100.00;
-    intensityLvl = 1;
+    intensityLvl = 0.0;
     sessionLength = 0;
     currentSessionTimer = new QTimer(this);
     noConnectionTimer = new QTimer(this);
     currentSession = NULL;
+    elaspedTime =0;
 
     // Initializing connections
     connect(ui->powerButton, SIGNAL(pressed()), this, SLOT(powerButtonPress()));
@@ -187,7 +188,12 @@ void MainWindow::upButtonPress()
 
         if (currentSession != NULL)
         {
-            // TODO: adjust intensity
+            if(intensityLvl<8)
+                intensityLvl +=0.5;
+            else
+                intensityLvl =8;
+            displayIntensityLevel();
+            // TODO: update record (history) with most recent intensity level somefunction();
         }
         else
         {
@@ -204,7 +210,13 @@ void MainWindow::downButtonPress()
 
         if (currentSession != NULL)
         {
-            // TODO: adjust intensity
+            if(intensityLvl>0)
+                intensityLvl -=0.5;
+            else
+                intensityLvl =0;
+            displayIntensityLevel();
+            // TODO: update record (history) with most recent intensity level somefunction();
+
         }
         else
         {
@@ -257,7 +269,8 @@ void MainWindow::confirmButtonRelease()
             setInt = 0;
         }
         Session* s = new Session(setLen,setFreq,setInt);
-        intensityLvl = 0; // as specified in manual, intensity will always start at 0
+        intensityLvl = 0.0; // as specified in manual, intensity will always start at 0
+        currentSession = s;
         startSession(s);
 
     } else {
@@ -273,8 +286,8 @@ void MainWindow::startSession(Session *s)
 
     if(testConnection())
     {
+        currentSession->print();
         initializeTimer();
-        currentSession = s;
         std::cout << "Session Start" << std::endl;
     }
     else
@@ -298,6 +311,7 @@ void MainWindow::initializeTimer()
 
 void MainWindow::depleteBattery()
 {
+    elaspedTime +=1;
     batteryLvl -= 1;
     std::cout << "Battery Level: "<< batteryLvl << std::endl;
 
@@ -306,6 +320,13 @@ void MainWindow::depleteBattery()
         powerOn = false;
         handlePowerOff();
     }
+
+    if (elaspedTime%5 ==0){
+        displayBatteryLevel();
+    }
+    else
+        displayIntensityLevel();
+
 }
 
 void MainWindow::displayBatteryLevel()
@@ -316,6 +337,19 @@ void MainWindow::displayBatteryLevel()
         levelToDisplay = 1;
     }
     // std::cout << levelToDisplay << std::endl;
+    for (int i = 0; i < levelToDisplay; i++) {
+        sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
+    }
+    for (std::size_t i = levelToDisplay; i < sessionNumLabel.size(); i++) {
+        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
+    }
+}
+
+void MainWindow::displayIntensityLevel()
+{
+    int levelToDisplay = floor(intensityLvl); // convert battery level to be out of 8 instead of 100, since we have 8 lights to show level
+    // needed since otherwise when battery below ~12% it would otherwise show no bars
+
     for (int i = 0; i < levelToDisplay; i++) {
         sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
     }
@@ -466,6 +500,8 @@ void MainWindow::flashConnection()
         noConnectionTimer->stop();
         connectionButtonsLit = false;
         // start session if skin is connected
+
+        //Sending in test session so currentSession isnt null
         startSession(currentSession);
         return;
     }

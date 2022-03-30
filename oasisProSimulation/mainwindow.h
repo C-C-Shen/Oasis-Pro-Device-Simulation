@@ -10,6 +10,7 @@
 #include <QPair>
 #include <iostream>
 #include <vector>
+#include <math.h>
 
 #include "recording.h"
 #include "session.h"
@@ -32,8 +33,9 @@ class MainWindow : public QMainWindow
         bool skinConnection;
         bool connectionButtonsLit;
         double batteryLvl; // battery level ranging from 0-100
-        int intensityLvl; // current session intensity level
+        float intensityLvl; // current session intensity level
         int sessionLength; // total current session length (in minutes)
+        int elaspedTime; // elasped time for the current session, increases by one on each timeout call by currentSessionTimer
 
         // TODO: currentState -> track device state, (0 = just powered on, 1 = session running, etc), more may be needed later
 
@@ -102,6 +104,9 @@ class MainWindow : public QMainWindow
         /// Display the current battery level using session number labels
         void displayBatteryLevel();
 
+        /// Display the current Intensity level using session number labels
+        void displayIntensityLevel();
+
         /// Light up session numbers that have available sessions to select
         void displaySessionSelect();
 
@@ -117,7 +122,7 @@ class MainWindow : public QMainWindow
         /// Record last session
         void recordSession();
 
-        /// Adjust intensityLvl to newIntensity
+        /// Adjust intensityLvl to newIntensity             (could remove maybe idk - Gurpiar)
         void adjustIntensity(int newIntensity);
 
         /// Perform connection test
