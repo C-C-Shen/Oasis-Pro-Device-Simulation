@@ -32,7 +32,7 @@ int Session::getIntensity()
 
 void Session::setIntensity(int intense)
 {
-    if (intense >= 0 && intense <= 7) {
+    if (intense >= 0 && intense <= 8) {
         intensity = intense;
     } else {
         std::cout << "Invalid intensity setting" << std::endl;

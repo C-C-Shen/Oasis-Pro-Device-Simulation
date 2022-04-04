@@ -20,7 +20,6 @@ MainWindow::MainWindow(QWidget *parent)
     badConnection = false;
     batteryLvl = 100.00;
     intensityLvl = 0.0;
-    sessionLength = 0;
     currentSessionTimer = new QTimer(this);
     testConnectionTimer = new QTimer(this);
     currentSession = NULL;
@@ -250,15 +249,13 @@ void MainWindow::confirmButtonRelease()
     if (!powerOn)
            return;
 
-    if (currentSession != NULL)
-            return;
+    if (elapsed >= 1000 && currentSession != NULL) {
+        //Long Press to save preference
 
-    if (elapsed >= 2000) {
-        //TODO: Long Press to switch to save mode later on
+        sessions[lengthPosition][typePosition]->setIntensity(intensityLvl);
+        std::cout << "Intensity Saved" <<sessions[lengthPosition][typePosition]->getIntensity()<< std::endl;
 
-        std::cout << "Long Confirm Pressed" << std::endl;
-
-    } else if (powerOn) {
+    } else if (powerOn&&currentSession == NULL) {
         std::cout << "Normal Press" << std::endl;
         //testing battery depletion, can remove
         QString setLen;
@@ -281,11 +278,18 @@ void MainWindow::confirmButtonRelease()
         }
         // TODO: instead of making a new session, just point to one of the stored ones
         Session* s = new Session(setLen,setType,setFreq,setInt);
-        intensityLvl = 0.0; // as specified in manual, intensity will always start at 0
+        intensityLvl = setInt; // as specified in manual, intensity will always start at 0
         currentSession = s;
         startSession(s);
 
-    } else {
+    }
+    else if (currentSession != NULL){
+        //disable regular press during session
+        //std::cout << "Disabled" << std::endl;
+        return;
+    }
+
+    else {
         std::cout << "Turn on device" << std::endl;
     }
 }
@@ -327,8 +331,21 @@ void MainWindow::startSession(Session *s)
 void MainWindow::endSession()
 {
     std::cout << "Session End" << std::endl;
-    recordToFile(currentSession);
-    recordingPending = false;
+    //record session
+    if(recordingPending){
+        recordToFile(currentSession);
+        recordingPending = false;
+    }
+
+    //pause timer
+    currentSessionTimer->stop();
+
+    // remove current session
+    currentSession = NULL;
+
+    skinConnection = false;
+    elaspedTime =0;
+
 }
 
 void MainWindow::initializeTimer()
@@ -349,6 +366,13 @@ void MainWindow::depleteBattery()
         powerOn = false;
         handlePowerOff();
     }
+
+    if(elaspedTime==currentSession->getSessionLength().toInt()){
+        this->powerOn = false;
+        handlePowerOff();
+        return;
+    }
+
 
     if ((elaspedTime % 5) == 0)
     {
@@ -420,11 +444,10 @@ void MainWindow::handlePowerOn()
 
 void MainWindow::handlePowerOff()
 {
-    //pause timer
-    currentSessionTimer->stop();
+    if(currentSession!=NULL)
+        endSession();
 
-    // remove current session
-    currentSession = NULL;
+    //TODO: Reset menu select options. When the powered up again the menu jumps to the a select since no reset.
 
     //update interface
     for (std::size_t i = 0; i < sessionLengthLabel.size(); i++) {

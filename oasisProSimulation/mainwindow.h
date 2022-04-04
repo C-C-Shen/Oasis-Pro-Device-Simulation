@@ -38,7 +38,6 @@ class MainWindow : public QMainWindow
         bool recordingPending; // if true, a session needs to be recorded
         double batteryLvl; // battery level ranging from 0-100
         float intensityLvl; // current session intensity level
-        int sessionLength; // total current session length (in minutes)
         int elaspedTime; // elasped time for the current session, increases by one on each timeout call by currentSessionTimer
 
         // TODO: currentState -> track device state, (0 = just powered on, 1 = session running, etc), more may be needed later
