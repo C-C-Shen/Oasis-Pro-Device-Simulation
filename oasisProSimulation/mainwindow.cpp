@@ -201,8 +201,9 @@ void MainWindow::upButtonPress()
                 intensityLvl +=0.5;
             else
                 intensityLvl =8;
+
+            currentSession->setIntensity(intensityLvl);
             displayIntensityLevel();
-            // TODO: update record (history) with most recent intensity level somefunction();
         }
         else
         {
@@ -223,9 +224,9 @@ void MainWindow::downButtonPress()
                 intensityLvl -=0.5;
             else
                 intensityLvl =0;
-            displayIntensityLevel();
-            // TODO: update record (history) with most recent intensity level somefunction();
 
+            currentSession->setIntensity(intensityLvl);
+            displayIntensityLevel();
         }
         else
         {
