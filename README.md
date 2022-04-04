@@ -25,7 +25,8 @@
  
  ## TODO
 - Some UI updates such as:
-  - Intenisty number blinking when ajusted
-  - Saving itensity animation
+  - Intenisty number blinking when adjusted
+  - Saving intensity animation
+  - Record button icon
 - Sequence Diagrams
 - Tracability Diagram
