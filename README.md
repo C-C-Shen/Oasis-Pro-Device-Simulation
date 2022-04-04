@@ -10,7 +10,7 @@
 - Christopher Shen
   - TODO
  
-** Message To TA: Could you please check our design documents for any improvements? Thank you.**
+**Message To TA: Could you please check our design documents for any improvements? Thank you.**
  
   ## Current Functionailty 
  - Hold the Power Button for 2 Seconds to Turn on the device
