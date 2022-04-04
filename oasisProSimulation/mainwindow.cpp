@@ -52,8 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
             Session *newS = new Session(g[i],t[j],f[j],0);
             newVector.push_back(newS);
         }
-        QPair<QString, QVector<Session *>> newPair = qMakePair(g[i],newVector);
-        sessions.push_back(newPair);
+        sessions.push_back(newVector);
     }
 
     // Initializing vector pixmaps
@@ -269,10 +268,10 @@ void MainWindow::confirmButtonRelease()
         // 0, 1 mean pre-defined groups
         if (lengthPosition != 2) {
             std::cout << lengthPosition << " " << typePosition << std::endl;
-            setLen = sessions[lengthPosition].second[typePosition]->getSessionLength();
-            setType = sessions[lengthPosition].second[typePosition]->getType();
-            setFreq = sessions[lengthPosition].second[typePosition]->getFrequency();
-            setInt = sessions[lengthPosition].second[typePosition]->getIntensity();
+            setLen = sessions[lengthPosition][typePosition]->getSessionLength();
+            setType = sessions[lengthPosition][typePosition]->getType();
+            setFreq = sessions[lengthPosition][typePosition]->getFrequency();
+            setInt = sessions[lengthPosition][typePosition]->getIntensity();
         } else {
             // TODO: select user defined session
             // these are place holder values for now
@@ -395,7 +394,7 @@ void MainWindow::displaySessionSelect()
     int availableToSelect = 0;
     // if user defined sessions is empty, sessions.size() will possibly be 1 less than lengthPosition
     if (sessions.size() > lengthPosition) {
-        availableToSelect = sessions[lengthPosition].second.size();
+        availableToSelect = sessions[lengthPosition].size();
     }
     for (int i = 0; i < availableToSelect; i++) {
         sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);

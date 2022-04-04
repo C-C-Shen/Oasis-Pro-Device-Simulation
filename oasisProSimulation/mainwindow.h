@@ -56,12 +56,11 @@ class MainWindow : public QMainWindow
 
         // vector of pairs of strings to session pointer vectors
         /* General Structure
-         * Outer vector stores pairs, 0 = "20" pair, 1 = "45" pair, 2 = "User" pair
-         * Each pair associates a group type to a vector of sessions with that group type (ie, "20", "45", "User")
+         * Outer vector stores pairs, 0 = "20", 1 = "45", 2 = "User" (ie, grouped by lengths)
          * Inner vector stores pointers to sessions within the pairs
          * In this case, sessions found under "20" and "45" are the pre-defined default sessions, "User" is empty to start
          */
-        QVector<QPair<QString, QVector<Session *>>> sessions; // all possible sessions
+        QVector<QVector<Session *>> sessions; // all possible sessions
 
         // vector of QLabel objects, to help iterate over which to turn on and off
         std::vector<QLabel *> sessionLengthLabel;
