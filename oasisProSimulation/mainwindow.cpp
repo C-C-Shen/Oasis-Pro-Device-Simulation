@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <time.h>
 
+// helper function to nicely record the recorded session to a file.
+void recordToFile(Session * sToRecord);
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -39,13 +42,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Initialize default sessions
     QVector<QString> g = {"20", "45", "User"}; // lengths are actually just groups
+    QVector<QString> t = {"Sub Delta", "Delta", "Alpha", "Theta"};
     QVector<QString> f = {"1.75", "3.75", "7", "10"}; // types are actually just sessions (sub delta, delta, etc)
 
     // -1 since last group is user defined, which will be given nothing seperatly
     for (int i = 0; i < g.size() - 1; i++) {
         QVector<Session *> newVector;
         for (int j = 0 ; j < f.size(); j++) {
-            Session *newS = new Session(g[i],f[j],0);
+            Session *newS = new Session(g[i],t[j],f[j],0);
             newVector.push_back(newS);
         }
         QPair<QString, QVector<Session *>> newPair = qMakePair(g[i],newVector);
@@ -134,6 +138,13 @@ void MainWindow::powerButtonRelease() {
     if (elapsed >= 2000) {
         // toggle device power
         if (this->powerOn) {
+            // if the device is powered off before a session completes, record first
+            // TODO: should we also record if the session was interupted or not?
+            if (recordingPending) {
+                recordToFile(currentSession);
+                recordingPending = false;
+            }
+
             std::cout << "Powering Off" << std::endl;
             this->powerOn = false;
             handlePowerOff();
@@ -149,7 +160,7 @@ void MainWindow::powerButtonRelease() {
         switchGroups();
         displaySessionSelect();
     } else {
-        // this is just here for testing purpose, can be removed later
+        // indicate the need for power on first
         std::cout << "Long press to turn on" << std::endl;
     }
 }
@@ -251,12 +262,14 @@ void MainWindow::confirmButtonRelease()
         std::cout << "Normal Press" << std::endl;
         //testing battery depletion, can remove
         QString setLen;
+        QString setType;
         QString setFreq;
         int setInt;
         // 0, 1 mean pre-defined groups
         if (lengthPosition != 2) {
             std::cout << lengthPosition << " " << typePosition << std::endl;
             setLen = sessions[lengthPosition].second[typePosition]->getSessionLength();
+            setType = sessions[lengthPosition].second[typePosition]->getType();
             setFreq = sessions[lengthPosition].second[typePosition]->getFrequency();
             setInt = sessions[lengthPosition].second[typePosition]->getIntensity();
         } else {
@@ -266,7 +279,8 @@ void MainWindow::confirmButtonRelease()
             setFreq = "5";
             setInt = 0;
         }
-        Session* s = new Session(setLen,setFreq,setInt);
+        // TODO: instead of making a new session, just point to one of the stored ones
+        Session* s = new Session(setLen,setType,setFreq,setInt);
         intensityLvl = 0.0; // as specified in manual, intensity will always start at 0
         currentSession = s;
         startSession(s);
@@ -283,7 +297,9 @@ void MainWindow::recordButtonPress()
 
     if (currentSession != NULL)
     {
-        std::cout << "Recorded session - freq: " << currentSession->getFrequency().toStdString() << ", intensity: " << intensityLvl << ", length: " << currentSession->getSessionLength().toStdString() << std::endl;
+        // recordToFile(currentSession);
+        // indicated that we need to record a session
+        recordingPending = true;
     }
     else
     {
@@ -311,6 +327,8 @@ void MainWindow::startSession(Session *s)
 void MainWindow::endSession()
 {
     std::cout << "Session End" << std::endl;
+    recordToFile(currentSession);
+    recordingPending = false;
 }
 
 void MainWindow::initializeTimer()
@@ -561,4 +579,33 @@ void MainWindow::stopConnectionTest()
 
     displayIntensityLevel();
     initializeTimer();
+}
+
+// Should this maybe be done by a seperate recording class?
+void recordToFile(Session * sToRecord) {
+    std::ofstream recordFile;
+    // TODO: do we need to change the output directory to the non-debug folder?
+    recordFile.open("treatment_history.txt", std::fstream::app);
+
+    // to check where the .txt will be created/looked for
+    char cwd[256];
+    getcwd(cwd, 256);
+    std::cout << cwd << std::endl;
+
+    if (!recordFile) {
+        std::cout << "Could not opening/making file" << std::endl;
+        return;
+    }
+
+    recordFile.seekp(0, std::ios::end);
+
+    recordFile << "Session Type: " << sToRecord->getType().toStdString() << ", Frequency: " << sToRecord->getFrequency().toStdString()
+               << "\nTotal Duration: " << sToRecord->getSessionLength().toStdString()
+               << "\nIntensity: " << sToRecord->getIntensity() << "\n\n";
+
+    std::cout << "Recorded session - type: " << sToRecord->getType().toStdString()
+              << ", freq: " << sToRecord->getFrequency().toStdString() << ", intensity: "
+              << sToRecord->getIntensity()<< ", length: " << sToRecord->getSessionLength().toStdString() << std::endl;
+
+    recordFile.close();
 }

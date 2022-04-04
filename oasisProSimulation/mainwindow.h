@@ -11,6 +11,8 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
+#include <fstream>
+#include <unistd.h>
 
 #include "recording.h"
 #include "session.h"
@@ -33,6 +35,7 @@ class MainWindow : public QMainWindow
         bool skinConnection;
         bool badConnection;
         bool connectionButtonsLit;
+        bool recordingPending; // if true, a session needs to be recorded
         double batteryLvl; // battery level ranging from 0-100
         float intensityLvl; // current session intensity level
         int sessionLength; // total current session length (in minutes)
