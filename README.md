@@ -24,9 +24,20 @@
  
  
  ## TODO
+- User Designated Time
+- Remove Extra UI
+- Battery Function
+- Rearrange Drain Battery
+- Soft On Animation (1-8 using timers) If interrupted after the connection test, do not load saved preferences 
+- Soft Off Animation (8-1 using timers) when powering off
+- Onboot call displayBattery(0 sleep one second)
+- Memory Mangement
+- Fix new Session in ConfirmButtonRelease
 - Some UI updates such as:
   - Intenisty number blinking when adjusted
   - Saving intensity animation
   - Record button icon
+  - Indicate selected session with blinking number
 - Sequence Diagrams
 - Tracability Diagram
+- UML Diagram
