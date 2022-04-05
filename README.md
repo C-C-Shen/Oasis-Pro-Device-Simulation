@@ -36,8 +36,8 @@
 - Some UI updates such as:
   - Intenisty number blinking when adjusted
   - Saving intensity animation
-  - Record button icon
+  - Record button icon - Kayla
   - Indicate selected session with blinking number
-- Sequence Diagrams
-- Tracability Diagram
-- UML Diagram
+- Sequence Diagrams - Kayla
+- Tracability Diagram - Kayla
+- UML Diagram - Kayla
