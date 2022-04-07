@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->confirmButton, SIGNAL(released()), this, SLOT(confirmButtonRelease()));
     connect(ui->recordButton, SIGNAL(pressed()), this, SLOT(recordButtonPress()));
     connect(ui->loadUserDesignedButton, SIGNAL(pressed()), this, SLOT(loadUserDesignedButtonPress()));
+    connect(ui->printRecordedSessions, SIGNAL(pressed()), this, SLOT(printRecordedButtonPress()));
     connect(testConnectionTimer, SIGNAL(timeout()), this, SLOT(flashConnection()));
     connect(currentSessionTimer, SIGNAL(timeout()), this, SLOT(depleteBattery()));
 
@@ -142,9 +143,7 @@ void MainWindow::powerButtonRelease() {
             // TODO: should we also record if the session was interupted or not?
             if(recorder.getPending()){
                 recorder.recordSession(currentSession, true);
-                recorder.print();
             }
-            recorder.print();
 
             std::cout << "Powering Off" << std::endl;
             this->powerOn = false;
@@ -319,6 +318,11 @@ void MainWindow::loadUserDesignedButtonPress()
     std::cout << "Load user designed button pressed" << std::endl;
 }
 
+void MainWindow::printRecordedButtonPress()
+{
+    recorder.print();
+}
+
 void MainWindow::startSession(Session *s)
 {
     //a test session created in confirmButtonRelase()
@@ -338,7 +342,6 @@ void MainWindow::endSession()
 
     if(recorder.getPending()){
         recorder.recordSession(currentSession, true);
-        recorder.print();
     }
 
     //pause timer

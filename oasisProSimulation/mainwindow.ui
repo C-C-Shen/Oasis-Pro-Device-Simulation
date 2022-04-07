@@ -580,7 +580,7 @@ border-radius: 25px;</string>
       <x>208</x>
       <y>10</y>
       <width>521</width>
-      <height>191</height>
+      <height>214</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -824,8 +824,8 @@ border-radius: 25px;</string>
      <rect>
       <x>28</x>
       <y>10</y>
-      <width>141</width>
-      <height>111</height>
+      <width>148</width>
+      <height>131</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="externalButtonsLayout">
@@ -856,6 +856,16 @@ border-radius: 25px;</string>
        </property>
        <property name="text">
         <string>Load User Designed</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="printRecordedSessions">
+       <property name="styleSheet">
+        <string notr="true">color: white</string>
+       </property>
+       <property name="text">
+        <string>Print Recorded Sessions</string>
        </property>
       </widget>
      </item>

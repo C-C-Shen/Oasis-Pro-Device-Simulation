@@ -159,6 +159,7 @@ class MainWindow : public QMainWindow
         void confirmButtonRelease();
         void recordButtonPress();
         void loadUserDesignedButtonPress();
+        void printRecordedButtonPress();
 
         /// Deplete batteryLvl by a variable level depending on length, intensity, and skin connection
         /// Here for now, needs to be a slot for timeout
