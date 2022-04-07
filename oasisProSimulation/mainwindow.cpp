@@ -437,6 +437,10 @@ void MainWindow::handlePowerOn()
     sessionTypeLabel[0]->setPixmap(sessionType_on[0]);
 
     ui->ledLabel->setStyleSheet("background-color:green");
+
+    // force the battery level to display for 1 second
+    QWidget::repaint();
+    sleep(1);
 }
 
 void MainWindow::handlePowerOff()
