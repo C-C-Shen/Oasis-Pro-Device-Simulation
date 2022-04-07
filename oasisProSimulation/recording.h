@@ -2,21 +2,26 @@
 #define RECORDING_H
 
 #include "session.h"
+#include <string>
+#include <fstream>
 
 class Recording
 {
     public:
-        Recording(int dur, int intensity, Session* session);
+        Recording();
         ~Recording();
 
-        int getDuration();
-        int getIntensityLvl();
-        Session& getSavedSession();
+        bool getPending();
+
+        void setFile(QString f) { fileName = f; }
+        void setPending() { recordingPending = true; }
+        void recordSession(Session *toRecord, bool complete);
+        void print(); // to help view the recorded sessions in console
 
     private:
-        int duration;
-        int intensityLvl;
-        Session* savedSession;
+        bool recordingPending;
+
+        QString fileName;
 };
 
 #endif // RECORDING_H
