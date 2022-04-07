@@ -39,5 +39,4 @@
   - Record button icon - Kayla
   - Indicate selected session with blinking number
 - Sequence Diagrams - Kayla
-- Tracability Diagram - Kayla
 - UML Diagram - Kayla
