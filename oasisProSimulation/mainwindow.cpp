@@ -142,7 +142,7 @@ void MainWindow::powerButtonRelease() {
             // if the device is powered off before a session completes, record first
             // TODO: should we also record if the session was interupted or not?
             if(recorder.getPending()){
-                recorder.recordSession(currentSession, true);
+                recorder.recordSession(currentSession, false);
             }
 
             std::cout << "Powering Off" << std::endl;
@@ -260,27 +260,17 @@ void MainWindow::confirmButtonRelease()
     } else if (powerOn&&currentSession == NULL) {
         std::cout << "Normal Press" << std::endl;
         //testing battery depletion, can remove
-        QString setLen;
-        QString setType;
-        QString setFreq;
-        int setInt;
+        Session* s;
+
         // 0, 1 mean pre-defined groups
         if (lengthPosition != 2) {
-            std::cout << lengthPosition << " " << typePosition << std::endl;
-            setLen = sessions[lengthPosition][typePosition]->getSessionLength();
-            setType = sessions[lengthPosition][typePosition]->getType();
-            setFreq = sessions[lengthPosition][typePosition]->getFrequency();
-            setInt = sessions[lengthPosition][typePosition]->getIntensity();
+            std::cout << "Pre-defined group selected" << std::endl;
+            s = sessions[lengthPosition][typePosition];
         } else {
-            // TODO: select user defined session
+            // TODO: this will need to be replaced with how s is set above when user designated is done
             // these are place holder values for now
-            setLen = "20";
-            setFreq = "5";
-            setInt = 0;
+            s = new Session("20","PLACEHOLDER","5",0);
         }
-        // TODO: instead of making a new session, just point to one of the stored ones
-        Session* s = new Session(setLen,setType,setFreq,setInt);
-        intensityLvl = setInt; // as specified in manual, intensity will always start at 0
         currentSession = s;
         startSession(s);
 
