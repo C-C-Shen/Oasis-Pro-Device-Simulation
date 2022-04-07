@@ -18,7 +18,7 @@
  - Up and Down arrows to shuffle through session frequencies
  - Toggle Skin Connection to attach clips to earloabs
  - Click Confirm to start session
- - During the session user can click on the record button to record the session to a .txt file stored in the debug folder
+ - During the session user can click on the record button to record the session to a .txt file stored in the debug folder, also prints .txt contents to console
  - The user can hold the confirm button for 1 second during the session to save the intensity for that session preset
  - The device will power off after session is over or the power button is held
  
