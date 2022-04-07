@@ -25,6 +25,8 @@ MainWindow::MainWindow(QWidget *parent)
     currentSession = NULL;
     elaspedTime = 0;
 
+    recorder.setFile(fileName);
+
     // Initializing connections
     connect(ui->powerButton, SIGNAL(pressed()), this, SLOT(powerButtonPress()));
     connect(ui->powerButton, SIGNAL(released()), this, SLOT(powerButtonRelease()));
@@ -138,10 +140,11 @@ void MainWindow::powerButtonRelease() {
         if (this->powerOn) {
             // if the device is powered off before a session completes, record first
             // TODO: should we also record if the session was interupted or not?
-            if (recordingPending) {
-                recordToFile(currentSession);
-                recordingPending = false;
+            if(recorder.getPending()){
+                recorder.recordSession(currentSession, true);
+                recorder.print();
             }
+            recorder.print();
 
             std::cout << "Powering Off" << std::endl;
             this->powerOn = false;
@@ -303,7 +306,7 @@ void MainWindow::recordButtonPress()
     {
         // recordToFile(currentSession);
         // indicated that we need to record a session
-        recordingPending = true;
+        recorder.setPending();
     }
     else
     {
@@ -332,9 +335,10 @@ void MainWindow::endSession()
 {
     std::cout << "Session End" << std::endl;
     //record session
-    if(recordingPending){
-        recordToFile(currentSession);
-        recordingPending = false;
+
+    if(recorder.getPending()){
+        recorder.recordSession(currentSession, true);
+        recorder.print();
     }
 
     //pause timer
@@ -602,33 +606,4 @@ void MainWindow::stopConnectionTest()
 
     displayIntensityLevel();
     initializeTimer();
-}
-
-// Should this maybe be done by a seperate recording class?
-void recordToFile(Session * sToRecord) {
-    std::ofstream recordFile;
-    // TODO: do we need to change the output directory to the non-debug folder?
-    recordFile.open("treatment_history.txt", std::fstream::app);
-
-    // to check where the .txt will be created/looked for
-    char cwd[256];
-    getcwd(cwd, 256);
-    std::cout << cwd << std::endl;
-
-    if (!recordFile) {
-        std::cout << "Could not opening/making file" << std::endl;
-        return;
-    }
-
-    recordFile.seekp(0, std::ios::end);
-
-    recordFile << "Session Type: " << sToRecord->getType().toStdString() << ", Frequency: " << sToRecord->getFrequency().toStdString()
-               << "\nTotal Duration: " << sToRecord->getSessionLength().toStdString()
-               << "\nIntensity: " << sToRecord->getIntensity() << "\n\n";
-
-    std::cout << "Recorded session - type: " << sToRecord->getType().toStdString()
-              << ", freq: " << sToRecord->getFrequency().toStdString() << ", intensity: "
-              << sToRecord->getIntensity()<< ", length: " << sToRecord->getSessionLength().toStdString() << std::endl;
-
-    recordFile.close();
 }

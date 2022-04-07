@@ -35,7 +35,6 @@ class MainWindow : public QMainWindow
         bool skinConnection;
         bool badConnection;
         bool connectionButtonsLit;
-        bool recordingPending; // if true, a session needs to be recorded
         double batteryLvl; // battery level ranging from 0-100
         float intensityLvl; // current session intensity level
         int elaspedTime; // elasped time for the current session, increases by one on each timeout call by currentSessionTimer
@@ -45,6 +44,10 @@ class MainWindow : public QMainWindow
         // variables holding specific positions for vectors
         int lengthPosition = 0;
         int typePosition = 0;
+
+        QString fileName = "treatment_history.txt";
+
+        Recording recorder;
 
         QElapsedTimer elapsedTimer;
         QElapsedTimer elapsedTimerConfirm;        //For the Confirm Button to save or start session
