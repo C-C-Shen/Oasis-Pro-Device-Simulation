@@ -42,7 +42,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->confirmButton, SIGNAL(pressed()), this, SLOT(confirmButtonPress()));
     connect(ui->confirmButton, SIGNAL(released()), this, SLOT(confirmButtonRelease()));
     connect(ui->recordButton, SIGNAL(pressed()), this, SLOT(recordButtonPress()));
-    connect(ui->loadUserDesignedButton, SIGNAL(pressed()), this, SLOT(loadUserDesignedButtonPress()));
     connect(ui->printRecordedSessions, SIGNAL(pressed()), this, SLOT(printRecordedButtonPress()));
     connect(testConnectionTimer, SIGNAL(timeout()), this, SLOT(flashConnection()));
     connect(currentSessionTimer, SIGNAL(timeout()), this, SLOT(updateTime()));
@@ -120,9 +119,13 @@ MainWindow::MainWindow(QWidget *parent)
     sessionStimLabel.push_back(ui->dcStimUserDesigned1);
 
     // Initializing pixmaps
-    L_on = QPixmap(":/icons/L_on.png");
+    L_on_green = QPixmap(":/icons/L_on_green.png");
+    L_on_yellow = QPixmap(":/icons/L_on_yellow.png");
+    L_on_red = QPixmap(":/icons/L_on_red.png");
     L_off = QPixmap(":/icons/L_off.png");
-    R_on = QPixmap(":/icons/R_on.png");
+    R_on_green = QPixmap(":/icons/R_on_green.png");
+    R_on_yellow = QPixmap(":/icons/R_on_yellow.png");
+    R_on_red = QPixmap(":/icons/R_on_red.png");
     R_off = QPixmap(":/icons/R_off.png");
     dutyCES_on = QPixmap(":/icons/dutyCES_on.png");
     dutyCES_off = QPixmap(":/icons/dutyCES_off.png");
@@ -183,13 +186,21 @@ void MainWindow::connectToSkin()
     std::cout << "Skin connection: " << skinConnection << std::endl;
 
     //Pause timer
-    if (currentSessionTimer->isActive() && currentSession != NULL){
-        if(!skinConnection){
+    if (currentSessionTimer->isActive() && currentSession != NULL)
+    {
+        if(!skinConnection)
+        {
+            ui->cesLeftLabel->setPixmap(L_on_red);
+            ui->cesRightLabel->setPixmap(R_on_red);
             currentSessionTimer->stop();
         }
     }
-    if (!currentSessionTimer->isActive() && currentSession != NULL){
-        if(skinConnection){
+    if (!currentSessionTimer->isActive() && currentSession != NULL)
+    {
+        if(skinConnection)
+        {
+            ui->cesLeftLabel->setPixmap(L_on_green);
+            ui->cesRightLabel->setPixmap(R_on_green);
             currentSessionTimer->start(1000);
         }
     }
@@ -321,17 +332,10 @@ void MainWindow::recordButtonPress()
     }
 }
 
-void MainWindow::loadUserDesignedButtonPress()
-{
-    std::cout << "Load user designed button pressed" << std::endl;
-}
-
 void MainWindow::printRecordedButtonPress()
 {
     recorder.print();
 }
-
-
 
 void MainWindow::startSession(Session *s)
 {
@@ -550,6 +554,8 @@ bool MainWindow::testConnection()
             sessionNumLabel[0]->setStyleSheet(sessionNum_on[0]);
             sessionNumLabel[1]->setStyleSheet(sessionNum_on[1]);
             sessionNumLabel[2]->setStyleSheet(sessionNum_on[2]);
+            ui->cesLeftLabel->setPixmap(L_on_green);
+            ui->cesRightLabel->setPixmap(R_on_green);
         }
         else
         {
@@ -557,6 +563,8 @@ bool MainWindow::testConnection()
             sessionNumLabel[3]->setStyleSheet(sessionNum_on[3]);
             sessionNumLabel[4]->setStyleSheet(sessionNum_on[4]);
             sessionNumLabel[5]->setStyleSheet(sessionNum_on[5]);
+            ui->cesLeftLabel->setPixmap(L_on_yellow);
+            ui->cesRightLabel->setPixmap(R_on_yellow);
         }
 
         badConnection = false;
@@ -566,6 +574,8 @@ bool MainWindow::testConnection()
     {
         // no connection
         badConnection = true;
+        ui->cesLeftLabel->setPixmap(L_on_red);
+        ui->cesRightLabel->setPixmap(R_on_red);
         return false;
     }
 }
@@ -633,8 +643,8 @@ void MainWindow::stopConnectionTest()
     ui->cesDutyLabel->setPixmap(dutyCES_off);
     ui->cesShortLabel->setPixmap(shortCES_off);
 
-    softAnimation =1;
-    numToFlash=0;
+    softAnimation = 1;
+    numToFlash = 0;
     softAnimationtTimer->start(250);
     displayIntensityLevel();
     initializeTimer();
@@ -642,7 +652,6 @@ void MainWindow::stopConnectionTest()
 
 void MainWindow::blinkNum()
 {
-
     if(softAnimation==1)
     {
         softOn();
@@ -656,8 +665,6 @@ void MainWindow::blinkNum()
         savingAnimation();
     }
 }
-
-
 
 void MainWindow::softOn()
 {
@@ -693,7 +700,7 @@ void MainWindow::softOff()
 
 void MainWindow::savingAnimation()
 {
-    std::cout<<"Itensity: "<<intensityLvl<<" : "<<floor(intensityLvl)<<std::endl;
+    std::cout<<"Intensity: "<<intensityLvl<<" : "<<floor(intensityLvl)<<std::endl;
     int leveltoFlash = floor(intensityLvl)-1;
     if(leveltoFlash<0)
         return;

@@ -21,10 +21,15 @@
         <file>icons/userdesigned_off.png</file>
         <file>icons/userdesigned_on.png</file>
         <file>icons/L_off.png</file>
-        <file>icons/L_on.png</file>
         <file>icons/R_off.png</file>
-        <file>icons/R_on.png</file>
         <file>icons/subdelta_off.png</file>
         <file>icons/subdelta_on.png</file>
+        <file>icons/L_on_green.png</file>
+        <file>icons/L_on_red.png</file>
+        <file>icons/record.png</file>
+        <file>icons/R_on_red.png</file>
+        <file>icons/R_on_yellow.png</file>
+        <file>icons/L_on_yellow.png</file>
+        <file>icons/R_on_green.png</file>
     </qresource>
 </RCC>

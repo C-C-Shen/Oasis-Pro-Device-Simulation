@@ -93,9 +93,13 @@ class MainWindow : public QMainWindow
         std::vector<QPixmap> sessionStim_on;
         std::vector<QPixmap> sessionStim_off;
 
-        QPixmap L_on;
+        QPixmap L_on_green;
+        QPixmap L_on_yellow;
+        QPixmap L_on_red;
         QPixmap L_off;
-        QPixmap R_on;
+        QPixmap R_on_green;
+        QPixmap R_on_yellow;
+        QPixmap R_on_red;
         QPixmap R_off;
         QPixmap dutyCES_on;
         QPixmap dutyCES_off;
@@ -175,7 +179,6 @@ class MainWindow : public QMainWindow
         void confirmButtonPress();
         void confirmButtonRelease();
         void recordButtonPress();
-        void loadUserDesignedButtonPress();
         void printRecordedButtonPress();
 
         /// drains battery and updates GUI based on elaspedTime
