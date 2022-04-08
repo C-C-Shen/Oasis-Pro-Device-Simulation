@@ -8,6 +8,14 @@ Session::Session(QString sLength, QString sType, QString freq, int intense)
     intensity = intense;
 }
 
+Session::Session(Session* s)
+{
+    length = s->length;
+    type = s->type;
+    frequency = s->frequency;
+    intensity = s->intensity;
+}
+
 Session::~Session() {}
 
 QString Session::getSessionLength()

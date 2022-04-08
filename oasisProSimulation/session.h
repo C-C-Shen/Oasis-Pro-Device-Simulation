@@ -8,6 +8,7 @@ class Session
 {
     public:
         Session(QString sLength, QString sType, QString freq, int intense);
+        Session(Session* s);
         ~Session();
 
         QString getSessionLength();

@@ -265,7 +265,6 @@ void MainWindow::upButtonPress()
 
         if (currentSession != NULL)
         {
-            std::cout << "this is working" << std::endl;
             if (currentSession->getIntensity() < 8)
             {
                 currentSession->setIntensity(currentSession->getIntensity() + 0.5);
@@ -341,23 +340,20 @@ void MainWindow::confirmButtonRelease()
     else if (powerOn && (currentSession == NULL))
     {
         std::cout << "Normal Press" << std::endl;
-        // testing battery depletion, can remove
-        Session* s;
 
         // 0, 1 mean pre-defined groups
         if (lengthPosition != 2)
         {
             std::cout << "Pre-defined group selected" << std::endl;
-            s = sessions[lengthPosition][typePosition];
+            currentSession = new Session(sessions[lengthPosition][typePosition]);
         }
         else
         {
             // TODO: this will need to be replaced with how s is set above when user designated is done
             // these are place holder values for now
-            s = new Session("20","PLACEHOLDER","5",0);
+            currentSession = new Session("20", "PLACEHOLDER", "5", 0);
         }
 
-        currentSession = s;
         startSession();
     }
     else if (currentSession != NULL)
@@ -415,6 +411,7 @@ void MainWindow::endSession()
     currentSessionTimer->stop();
 
     // remove current session
+    delete currentSession;
     currentSession = NULL;
 
     skinConnection = false;
