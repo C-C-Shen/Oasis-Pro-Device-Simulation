@@ -35,8 +35,9 @@
 - Fix new Session (when user designated) in ConfirmButtonRelease - done?
 - Some UI updates such as:
   - Intenisty number blinking when adjusted -Gurpiar (Done)
-  - Record button icon - Kayla
+  - Record button icon - Kayla (Done)
+  - L/R icons different colours based on connection
   - Indicate selected session with blinking number
 - Sequence Diagrams - Kayla
-- Tracability Diagram - Kayla
-- UML Diagram - Kayla
+- Tracability Diagram - Kayla (Done)
+- UML Diagram - Kayla (Mostly Done)
