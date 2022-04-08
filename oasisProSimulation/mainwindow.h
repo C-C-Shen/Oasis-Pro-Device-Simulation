@@ -38,6 +38,10 @@ class MainWindow : public QMainWindow
         double batteryLvl; // battery level ranging from 0-100
         float intensityLvl; // current session intensity level
         int elaspedTime; // elasped time for the current session, increases by one on each timeout call by currentSessionTimer
+        int numToFlash;
+        int softAnimation;
+        bool flashIntensity;
+
 
         // TODO: currentState -> track device state, (0 = just powered on, 1 = session running, etc), more may be needed later
 
@@ -54,6 +58,8 @@ class MainWindow : public QMainWindow
         Ui::MainWindow *ui;
         QTimer* currentSessionTimer; // timer that calls timeout() to reduce battery level and check if session time is up
         QTimer* testConnectionTimer;
+        QTimer* softAnimationtTimer;
+
         Session* currentSession; // current session being used
 
         // vector of pairs of strings to session pointer vectors
@@ -142,6 +148,17 @@ class MainWindow : public QMainWindow
         /// Starts Timer and Calls depleteBattery();
         void initializeTimer();
 
+        /// Deplete batteryLvl by a variable level depending on length, intensity, and skin connection
+        void depleteBattery();
+
+        ///
+        void softOn();
+
+
+        void softOff();
+
+        void savingAnimation();
+
     private slots:
         // button handling
         void powerButtonPress();
@@ -161,14 +178,17 @@ class MainWindow : public QMainWindow
         void loadUserDesignedButtonPress();
         void printRecordedButtonPress();
 
-        /// Deplete batteryLvl by a variable level depending on length, intensity, and skin connection
-        /// Here for now, needs to be a slot for timeout
-        void depleteBattery();
+        /// drains battery and updates GUI based on elaspedTime
+        void updateTime();
 
         /// Handles connection status blinking
         void flashConnection();
 
         /// Finishes connection test
         void stopConnectionTest();
+
+        void blinkNum();
+
+        void stopFlashing();
 };
 #endif // MAINWINDOW_H

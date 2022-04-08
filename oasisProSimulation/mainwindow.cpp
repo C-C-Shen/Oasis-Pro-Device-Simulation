@@ -22,8 +22,13 @@ MainWindow::MainWindow(QWidget *parent)
     intensityLvl = 0.0;
     currentSessionTimer = new QTimer(this);
     testConnectionTimer = new QTimer(this);
+    softAnimationtTimer = new QTimer(this);
+    softAnimation = 0;
+    flashIntensity =false;
+
     currentSession = NULL;
     elaspedTime = 0;
+    numToFlash =0;
 
     recorder.setFile(fileName);
 
@@ -40,7 +45,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->loadUserDesignedButton, SIGNAL(pressed()), this, SLOT(loadUserDesignedButtonPress()));
     connect(ui->printRecordedSessions, SIGNAL(pressed()), this, SLOT(printRecordedButtonPress()));
     connect(testConnectionTimer, SIGNAL(timeout()), this, SLOT(flashConnection()));
-    connect(currentSessionTimer, SIGNAL(timeout()), this, SLOT(depleteBattery()));
+    connect(currentSessionTimer, SIGNAL(timeout()), this, SLOT(updateTime()));
+    connect(softAnimationtTimer, SIGNAL(timeout()), this, SLOT(blinkNum()));
 
     // Initialize default sessions
     QVector<QString> g = {"20", "45", "User"}; // lengths are actually just groups
@@ -195,6 +201,11 @@ void MainWindow::upButtonPress()
     {
         std::cout << "Up button pressed" << std::endl;
 
+        if(softAnimation ==1)
+        {
+            std::cout<<"Interrupt!"<<std::endl;
+        }
+
         if (currentSession != NULL)
         {
             if(intensityLvl<8)
@@ -203,6 +214,8 @@ void MainWindow::upButtonPress()
                 intensityLvl =8;
 
             currentSession->setIntensity(intensityLvl);
+            softAnimation =3;
+            softAnimationtTimer->start(250);
             displayIntensityLevel();
         }
         else
@@ -226,6 +239,10 @@ void MainWindow::downButtonPress()
                 intensityLvl =0;
 
             currentSession->setIntensity(intensityLvl);
+            softAnimation =3;
+            softAnimationtTimer->start(250);
+            //testConnectionTimer->singleShot(1000, this, SLOT(stopFlashing()));
+
             displayIntensityLevel();
         }
         else
@@ -255,7 +272,8 @@ void MainWindow::confirmButtonRelease()
         //Long Press to save preference
 
         sessions[lengthPosition][typePosition]->setIntensity(intensityLvl);
-        std::cout << "Intensity Saved" <<sessions[lengthPosition][typePosition]->getIntensity()<< std::endl;
+        std::cout << "Intensity Saved: " <<sessions[lengthPosition][typePosition]->getIntensity()<< std::endl;
+
 
     } else if (powerOn&&currentSession == NULL) {
         std::cout << "Normal Press" << std::endl;
@@ -313,6 +331,8 @@ void MainWindow::printRecordedButtonPress()
     recorder.print();
 }
 
+
+
 void MainWindow::startSession(Session *s)
 {
     //a test session created in confirmButtonRelase()
@@ -352,17 +372,9 @@ void MainWindow::initializeTimer()
     }
 }
 
-void MainWindow::depleteBattery()
+void MainWindow::updateTime()
 {
-    elaspedTime += 1;
-    batteryLvl -= 1;
-    std::cout << "Battery Level: " << batteryLvl << std::endl;
-
-    if (batteryLvl == 0)
-    {
-        powerOn = false;
-        handlePowerOff();
-    }
+    depleteBattery();
 
     if(elaspedTime==currentSession->getSessionLength().toInt()){
         this->powerOn = false;
@@ -373,14 +385,29 @@ void MainWindow::depleteBattery()
 
     if ((elaspedTime % 5) == 0)
     {
+        stopFlashing();
         displayBatteryLevel();
+
     }
     else
     {
         displayIntensityLevel();
     }
-
 }
+
+void MainWindow::depleteBattery()
+{
+    elaspedTime += 1;
+    batteryLvl -= (intensityLvl>1)?(0.2+(intensityLvl/10)):(0.2);
+    std::cout << "Battery Level: " << batteryLvl << std::endl;
+    if (batteryLvl == 0)
+    {
+        powerOn = false;
+        handlePowerOff();
+    }
+}
+
+
 
 void MainWindow::displayBatteryLevel()
 {
@@ -447,6 +474,11 @@ void MainWindow::handlePowerOff()
 {
     if(currentSession!=NULL)
         endSession();
+
+    softAnimation =2;
+    numToFlash=7;
+    softAnimationtTimer->start(250);
+
 
     //TODO: Reset menu select options. When the powered up again the menu jumps to the a select since no reset.
 
@@ -601,6 +633,89 @@ void MainWindow::stopConnectionTest()
     ui->cesDutyLabel->setPixmap(dutyCES_off);
     ui->cesShortLabel->setPixmap(shortCES_off);
 
+    softAnimation =1;
+    numToFlash=0;
+    softAnimationtTimer->start(250);
     displayIntensityLevel();
     initializeTimer();
 }
+
+void MainWindow::blinkNum()
+{
+
+    if(softAnimation==1)
+    {
+        softOn();
+    }
+    else if (softAnimation ==2)
+    {
+        softOff();
+    }
+    else if (softAnimation ==3)
+    {
+        savingAnimation();
+    }
+}
+
+
+
+void MainWindow::softOn()
+{
+    if(numToFlash<8){
+        for (int i = 0; i < 8; i++) {
+            sessionNumLabel[i]->setStyleSheet(sessionNum_off);
+        }
+            sessionNumLabel[numToFlash]->setStyleSheet(sessionNum_on[numToFlash]);
+     }
+    else{
+        softAnimationtTimer->stop();
+        softAnimation =0;
+    }
+    numToFlash++;
+}
+
+void MainWindow::softOff()
+{
+    if(numToFlash>-1){
+        for (int i = 7; i > 0; i--) {
+            sessionNumLabel[i]->setStyleSheet(sessionNum_off);
+        }
+            sessionNumLabel[numToFlash]->setStyleSheet(sessionNum_on[numToFlash]);
+     }
+    else{
+        softAnimationtTimer->stop();
+        softAnimation =0;
+        sessionNumLabel[0]->setStyleSheet(sessionNum_off);
+
+    }
+    numToFlash--;
+}
+
+void MainWindow::savingAnimation()
+{
+    std::cout<<"Itensity: "<<intensityLvl<<" : "<<floor(intensityLvl)<<std::endl;
+    int leveltoFlash = floor(intensityLvl)-1;
+    if(leveltoFlash<0)
+        return;
+
+    if(flashIntensity)
+    {
+        sessionNumLabel[leveltoFlash]->setStyleSheet(sessionNum_on[leveltoFlash]);
+    }
+    else
+    {
+        sessionNumLabel[leveltoFlash]->setStyleSheet(sessionNum_off);
+    }
+
+    flashIntensity = !flashIntensity;
+}
+
+
+void MainWindow::stopFlashing()
+{
+    softAnimationtTimer->stop();
+}
+
+
+
+
