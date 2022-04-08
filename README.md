@@ -26,7 +26,7 @@
  
  ## TODO
 - User Designated Time
-- Remove Extra UI
+- Remove Extra UI - Kayla (Done)
 - Battery Function - Gurpiar (Done)
 - Rearrange Drain Battery - Gurpiar (Done)
 - Soft On Animation (1-8 using timers) If interrupted after the connection test, do not load saved preferences -Gurpiar (Done)
@@ -36,8 +36,8 @@
 - Some UI updates such as:
   - Intenisty number blinking when adjusted -Gurpiar (Done)
   - Record button icon - Kayla (Done)
-  - L/R icons different colours based on connection
-  - Indicate selected session with blinking number
+  - L/R icons different colours based on connection - Kayla (Done)
+  - Indicate selected session with blinking number - Kayla (Done)
 - Sequence Diagrams - Kayla
 - Tracability Diagram - Kayla (Done)
 - UML Diagram - Kayla (Mostly Done)
