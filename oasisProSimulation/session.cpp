@@ -8,7 +8,7 @@ Session::Session(QString sLength, QString sType, QString freq, int intense)
     intensity = intense;
 }
 
-Session::~Session(){}
+Session::~Session() {}
 
 QString Session::getSessionLength()
 {
@@ -25,16 +25,19 @@ QString Session::getFrequency()
     return frequency;
 }
 
-int Session::getIntensity()
+double Session::getIntensity()
 {
     return intensity;
 }
 
-void Session::setIntensity(int intense)
+void Session::setIntensity(double i)
 {
-    if (intense >= 0 && intense <= 8) {
-        intensity = intense;
-    } else {
+    if (i >= 0 && i <= 8)
+    {
+        intensity = i;
+    }
+    else
+    {
         std::cout << "Invalid intensity setting" << std::endl;
     }
 }

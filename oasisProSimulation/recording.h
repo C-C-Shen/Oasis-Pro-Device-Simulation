@@ -12,7 +12,6 @@ class Recording
         ~Recording();
 
         bool getPending();
-
         void setFile(QString f) { fileName = f; }
         void setPending() { recordingPending = true; }
         void recordSession(Session *toRecord, bool complete);
@@ -20,7 +19,6 @@ class Recording
 
     private:
         bool recordingPending;
-
         QString fileName;
 };
 

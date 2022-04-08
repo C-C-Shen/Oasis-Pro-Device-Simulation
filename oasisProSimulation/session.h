@@ -13,15 +13,15 @@ class Session
         QString getSessionLength();
         QString getType();
         QString getFrequency();
-        int getIntensity();
-        void setIntensity(int intense);
+        double getIntensity();
+        void setIntensity(double i);
         void print() { std::cout << "Len. " << length.toStdString() << " Freq. " << frequency.toStdString() << " int. " << intensity << std::endl; }
 
     private:
         QString length; // session length/group (ex. 20 min)
         QString type; // the string version of the session type (Sub Delta, Delta, etc)
         QString frequency; // frequency level (ex. 0.5 Hz) <- this is also type (ex. 6-8 Hz = Theta)
-        int intensity; // intensity level
+        double intensity; // intensity level
 };
 
 #endif // SESSION_H

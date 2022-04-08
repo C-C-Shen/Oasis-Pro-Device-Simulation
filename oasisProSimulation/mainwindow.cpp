@@ -18,17 +18,16 @@ MainWindow::MainWindow(QWidget *parent)
     skinConnection = false;
     connectionButtonsLit = false;
     badConnection = false;
+    flashIntensity = false;
     batteryLvl = 100.00;
-    intensityLvl = 0.0;
+    elaspedTime = 0;
+    numToFlash = 0;
+    softAnimation = 0;
+
     currentSessionTimer = new QTimer(this);
     testConnectionTimer = new QTimer(this);
     softAnimationtTimer = new QTimer(this);
-    softAnimation = 0;
-    flashIntensity =false;
-
     currentSession = NULL;
-    elaspedTime = 0;
-    numToFlash =0;
 
     recorder.setFile(fileName);
 
@@ -135,40 +134,86 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    delete currentSessionTimer;
+    delete testConnectionTimer;
+    delete softAnimationtTimer;
+    delete currentSession;
+
+    for (int i = 0; i < sessions.size(); i++)
+    {
+        for (int j = 0; j < sessions[i].size(); j++)
+        {
+            delete sessions[i][j];
+        }
+    }
+
+    for (int i = 0; i < (int)sessionLengthLabel.size(); i++)
+    {
+        delete sessionLengthLabel[i];
+    }
+
+    for (int i = 0; i < (int)sessionTypeLabel.size(); i++)
+    {
+        delete sessionTypeLabel[i];
+    }
+
+    for (int i = 0; i < (int)sessionNumLabel.size(); i++)
+    {
+        delete sessionNumLabel[i];
+    }
+
+    for (int i = 0; i < (int)sessionStimLabel.size(); i++)
+    {
+        delete sessionStimLabel[i];
+    }
+
     delete ui;
 }
 
-void MainWindow::powerButtonPress() {
+void MainWindow::powerButtonPress()
+{
     this->elapsedTimer.start();
 }
 
-void MainWindow::powerButtonRelease() {
+void MainWindow::powerButtonRelease()
+{
     int elapsed = this->elapsedTimer.elapsed();
+
     // for now, "long" press is anything over 2 seconds
-    if (elapsed >= 2000) {
+    if (elapsed >= 2000)
+    {
         // toggle device power
-        if (this->powerOn) {
+        if (this->powerOn)
+        {
             // if the device is powered off before a session completes, record first
             // TODO: should we also record if the session was interupted or not?
-            if(recorder.getPending()){
+            if(recorder.getPending())
+            {
                 recorder.recordSession(currentSession, false);
             }
 
             std::cout << "Powering Off" << std::endl;
             this->powerOn = false;
             handlePowerOff();
-        } else if (batteryLvl > 0) {
+        }
+        else if (batteryLvl > 0)
+        {
             std::cout << "Powering On" << std::endl;
             this->powerOn = true;
             handlePowerOn();
             displaySessionSelect();
         }
+
         std::cout << "Device power state: " << this->powerOn << std::endl;
-    } else if (this->powerOn && !testConnectionTimer->isActive()) {
+    }
+    else if (this->powerOn && !testConnectionTimer->isActive())
+    {
         std::cout << "Normal Press" << std::endl;
         switchGroups();
         displaySessionSelect();
-    } else {
+    }
+    else
+    {
         // indicate the need for power on first
         std::cout << "Long press to turn on" << std::endl;
     }
@@ -185,7 +230,7 @@ void MainWindow::connectToSkin()
     skinConnection = !skinConnection;
     std::cout << "Skin connection: " << skinConnection << std::endl;
 
-    //Pause timer
+    // Pause timer
     if (currentSessionTimer->isActive() && currentSession != NULL)
     {
         if(!skinConnection)
@@ -195,6 +240,7 @@ void MainWindow::connectToSkin()
             currentSessionTimer->stop();
         }
     }
+
     if (!currentSessionTimer->isActive() && currentSession != NULL)
     {
         if(skinConnection)
@@ -212,20 +258,24 @@ void MainWindow::upButtonPress()
     {
         std::cout << "Up button pressed" << std::endl;
 
-        if(softAnimation ==1)
+        if (softAnimation == 1)
         {
             std::cout<<"Interrupt!"<<std::endl;
         }
 
         if (currentSession != NULL)
         {
-            if(intensityLvl<8)
-                intensityLvl +=0.5;
+            std::cout << "this is working" << std::endl;
+            if (currentSession->getIntensity() < 8)
+            {
+                currentSession->setIntensity(currentSession->getIntensity() + 0.5);
+            }
             else
-                intensityLvl =8;
+            {
+                currentSession->setIntensity(8);
+            }
 
-            currentSession->setIntensity(intensityLvl);
-            softAnimation =3;
+            softAnimation = 3;
             softAnimationtTimer->start(250);
             displayIntensityLevel();
         }
@@ -244,16 +294,17 @@ void MainWindow::downButtonPress()
 
         if (currentSession != NULL && !testConnectionTimer->isActive())
         {
-            if(intensityLvl>0)
-                intensityLvl -=0.5;
+            if (currentSession->getIntensity() > 0)
+            {
+                currentSession->setIntensity(currentSession->getIntensity() - 0.5);
+            }
             else
-                intensityLvl =0;
+            {
+                currentSession->setIntensity(0);
+            }
 
-            currentSession->setIntensity(intensityLvl);
-            softAnimation =3;
+            softAnimation = 3;
             softAnimationtTimer->start(250);
-            //testConnectionTimer->singleShot(1000, this, SLOT(stopFlashing()));
-
             displayIntensityLevel();
         }
         else
@@ -277,40 +328,45 @@ void MainWindow::confirmButtonRelease()
     int elapsed = this->elapsedTimerConfirm.elapsed();
 
     if (!powerOn)
-           return;
+    {
+        return;
+    }
 
-    if (elapsed >= 1000 && currentSession != NULL) {
-        //Long Press to save preference
-
-        sessions[lengthPosition][typePosition]->setIntensity(intensityLvl);
+    if (elapsed >= 1000 && (currentSession != NULL))
+    {
+        // Long Press to save preference
+        sessions[lengthPosition][typePosition]->setIntensity(currentSession->getIntensity());
         std::cout << "Intensity Saved: " <<sessions[lengthPosition][typePosition]->getIntensity()<< std::endl;
-
-
-    } else if (powerOn&&currentSession == NULL) {
+    }
+    else if (powerOn && (currentSession == NULL))
+    {
         std::cout << "Normal Press" << std::endl;
-        //testing battery depletion, can remove
+        // testing battery depletion, can remove
         Session* s;
 
         // 0, 1 mean pre-defined groups
-        if (lengthPosition != 2) {
+        if (lengthPosition != 2)
+        {
             std::cout << "Pre-defined group selected" << std::endl;
             s = sessions[lengthPosition][typePosition];
-        } else {
+        }
+        else
+        {
             // TODO: this will need to be replaced with how s is set above when user designated is done
             // these are place holder values for now
             s = new Session("20","PLACEHOLDER","5",0);
         }
-        currentSession = s;
-        startSession(s);
 
+        currentSession = s;
+        startSession();
     }
-    else if (currentSession != NULL){
-        //disable regular press during session
-        //std::cout << "Disabled" << std::endl;
+    else if (currentSession != NULL)
+    {
+        // disable regular press during session
         return;
     }
-
-    else {
+    else
+    {
         std::cout << "Turn on device" << std::endl;
     }
 }
@@ -337,12 +393,8 @@ void MainWindow::printRecordedButtonPress()
     recorder.print();
 }
 
-void MainWindow::startSession(Session *s)
+void MainWindow::startSession()
 {
-    //a test session created in confirmButtonRelase()
-
-    //Initial connection test, see manual for more functionality
-
     if (testConnection())
     {
         currentSession->print();
@@ -352,26 +404,28 @@ void MainWindow::startSession(Session *s)
 void MainWindow::endSession()
 {
     std::cout << "Session End" << std::endl;
-    //record session
 
-    if(recorder.getPending()){
+    // record session
+    if (recorder.getPending())
+    {
         recorder.recordSession(currentSession, true);
     }
 
-    //pause timer
+    // pause timer
     currentSessionTimer->stop();
 
     // remove current session
     currentSession = NULL;
 
     skinConnection = false;
-    elaspedTime =0;
+    elaspedTime = 0;
 
 }
 
 void MainWindow::initializeTimer()
 {
-    if(skinConnection){
+    if (skinConnection)
+    {
         currentSessionTimer->start(1000);
     }
 }
@@ -380,18 +434,17 @@ void MainWindow::updateTime()
 {
     depleteBattery();
 
-    if(elaspedTime==currentSession->getSessionLength().toInt()){
+    if(elaspedTime == currentSession->getSessionLength().toInt())
+    {
         this->powerOn = false;
         handlePowerOff();
         return;
     }
 
-
     if ((elaspedTime % 5) == 0)
     {
         stopFlashing();
         displayBatteryLevel();
-
     }
     else
     {
@@ -402,8 +455,10 @@ void MainWindow::updateTime()
 void MainWindow::depleteBattery()
 {
     elaspedTime += 1;
-    batteryLvl -= (intensityLvl>1)?(0.2+(intensityLvl/10)):(0.2);
+    batteryLvl -= (currentSession->getIntensity() > 1) ? (0.2+(currentSession->getIntensity() / 10)) : (0.2);
+
     std::cout << "Battery Level: " << batteryLvl << std::endl;
+
     if (batteryLvl == 0)
     {
         powerOn = false;
@@ -411,16 +466,17 @@ void MainWindow::depleteBattery()
     }
 }
 
-
-
 void MainWindow::displayBatteryLevel()
 {
-    int levelToDisplay = (batteryLvl * 0.8)/10; // convert battery level to be out of 8 instead of 100, since we have 8 lights to show level
+    // convert battery level to be out of 8 instead of 100, since we have 8 lights to show level
     // needed since otherwise when battery below ~12% it would otherwise show no bars
-    if (levelToDisplay < 1) {
+    int levelToDisplay = (batteryLvl * 0.8)/10;
+
+    if (levelToDisplay < 1)
+    {
         levelToDisplay = 1;
     }
-    // std::cout << levelToDisplay << std::endl;
+
     for (int i = 0; i < levelToDisplay; i++) {
         sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
     }
@@ -431,12 +487,14 @@ void MainWindow::displayBatteryLevel()
 
 void MainWindow::displayIntensityLevel()
 {
-    int levelToDisplay = floor(intensityLvl); // round intensity level down (6.5 displays 6, 5.5, displays 5, etc.)
+    int levelToDisplay = floor(currentSession->getIntensity()); // round intensity level down (6.5 displays 6, 5.5, displays 5, etc.)
 
-    for (int i = 0; i < levelToDisplay; i++) {
+    for (int i = 0; i < levelToDisplay; i++)
+    {
         sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
     }
-    for (std::size_t i = levelToDisplay; i < sessionNumLabel.size(); i++) {
+    for (std::size_t i = levelToDisplay; i < sessionNumLabel.size(); i++)
+    {
         sessionNumLabel[i]->setStyleSheet(sessionNum_off);
     }
 }
@@ -444,14 +502,18 @@ void MainWindow::displayIntensityLevel()
 void MainWindow::displaySessionSelect()
 {
     int availableToSelect = 0;
+
     // if user defined sessions is empty, sessions.size() will possibly be 1 less than lengthPosition
-    if (sessions.size() > lengthPosition) {
+    if (sessions.size() > lengthPosition)
+    {
         availableToSelect = sessions[lengthPosition].size();
     }
-    for (int i = 0; i < availableToSelect; i++) {
+    for (int i = 0; i < availableToSelect; i++)
+    {
         sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
     }
-    for (std::size_t i = availableToSelect; i < 8; i++) {
+    for (std::size_t i = availableToSelect; i < 8; i++)
+    {
         sessionNumLabel[i]->setStyleSheet(sessionNum_off);
     }
 
@@ -467,6 +529,7 @@ void MainWindow::handlePowerOn()
     sessionLengthLabel[0]->setPixmap(sessionLength_on[0]);
     sessionTypeLabel[0]->setPixmap(sessionType_on[0]);
 
+    // light up LED strip
     ui->ledLabel->setStyleSheet("background-color:green");
 
     // force the battery level to display for 1 second
@@ -476,24 +539,28 @@ void MainWindow::handlePowerOn()
 
 void MainWindow::handlePowerOff()
 {
-    if(currentSession!=NULL)
+    if (currentSession != NULL)
+    {
         endSession();
+    }
 
-    softAnimation =2;
-    numToFlash=7;
+    softAnimation = 2;
+    numToFlash = 7;
     softAnimationtTimer->start(250);
-
 
     //TODO: Reset menu select options. When the powered up again the menu jumps to the a select since no reset.
 
-    //update interface
-    for (std::size_t i = 0; i < sessionLengthLabel.size(); i++) {
+    // update interface
+    for (std::size_t i = 0; i < sessionLengthLabel.size(); i++)
+    {
         sessionLengthLabel[i]->setPixmap(sessionLength_off[i]);
     }
-    for (std::size_t i = 0; i < sessionTypeLabel.size(); i++) {
+    for (std::size_t i = 0; i < sessionTypeLabel.size(); i++)
+    {
         sessionTypeLabel[i]->setPixmap(sessionType_off[i]);
     }
-    for (std::size_t i = 0; i < sessionNumLabel.size(); i++) {
+    for (std::size_t i = 0; i < sessionNumLabel.size(); i++)
+    {
         sessionNumLabel[i]->setStyleSheet(sessionNum_off);
     }
 
@@ -504,32 +571,46 @@ void MainWindow::handlePowerOff()
     ui->cesDutyLabel->setPixmap(dutyCES_off);
 }
 
-void MainWindow::switchGroups() {
+void MainWindow::switchGroups()
+{
     // start by turning all appropriate labels "off"
-    for (std::size_t i = 0; i < sessionLengthLabel.size(); i++) {
+    for (std::size_t i = 0; i < sessionLengthLabel.size(); i++)
+    {
         sessionLengthLabel[i]->setPixmap(sessionLength_off[i]);
     }
+
     lengthPosition++;
+
     // for groups, every iteration just increments by 1, until end reached, then return to beginning
-    if (lengthPosition > (int)sessionLengthLabel.size() - 1) {
+    if (lengthPosition > (int)sessionLengthLabel.size() - 1)
+    {
         lengthPosition = 0;
     }
+
     // turn "on" selected group label
     sessionLengthLabel[lengthPosition]->setPixmap(sessionLength_on[lengthPosition]);
 }
 
-void MainWindow::switchType(int direction) {
+void MainWindow::switchType(int direction)
+{
     // start by turning all appropriate labels "off"
-    for (std::size_t i = 0; i < sessionTypeLabel.size(); i++) {
+    for (std::size_t i = 0; i < sessionTypeLabel.size(); i++)
+    {
         sessionTypeLabel[i]->setPixmap(sessionType_off[i]);
     }
+
     typePosition += direction;
+
     // for types, every iteration is either +1 or -1, if out of bounds, wrap around.
-    if (typePosition > (int)sessionTypeLabel.size() - 1) {
+    if (typePosition > (int)sessionTypeLabel.size() - 1)
+    {
         typePosition = 0;
-    } else if (typePosition < 0) {
+    }
+    else if (typePosition < 0)
+    {
         typePosition = sessionTypeLabel.size() - 1;
     }
+
     // turn "on" selected type label
     sessionTypeLabel[typePosition]->setPixmap(sessionType_on[typePosition]);
 }
@@ -652,15 +733,15 @@ void MainWindow::stopConnectionTest()
 
 void MainWindow::blinkNum()
 {
-    if(softAnimation==1)
+    if (softAnimation == 1)
     {
         softOn();
     }
-    else if (softAnimation ==2)
+    else if (softAnimation == 2)
     {
         softOff();
     }
-    else if (softAnimation ==3)
+    else if (softAnimation == 3)
     {
         savingAnimation();
     }
@@ -668,44 +749,57 @@ void MainWindow::blinkNum()
 
 void MainWindow::softOn()
 {
-    if(numToFlash<8){
-        for (int i = 0; i < 8; i++) {
+    if (numToFlash < 8)
+    {
+        for (int i = 0; i < 8; i++)
+        {
             sessionNumLabel[i]->setStyleSheet(sessionNum_off);
         }
-            sessionNumLabel[numToFlash]->setStyleSheet(sessionNum_on[numToFlash]);
-     }
-    else{
-        softAnimationtTimer->stop();
-        softAnimation =0;
+
+        sessionNumLabel[numToFlash]->setStyleSheet(sessionNum_on[numToFlash]);
     }
+    else
+    {
+        softAnimationtTimer->stop();
+        softAnimation = 0;
+    }
+
     numToFlash++;
 }
 
 void MainWindow::softOff()
 {
-    if(numToFlash>-1){
-        for (int i = 7; i > 0; i--) {
+    if (numToFlash > -1)
+    {
+        for (int i = 7; i > 0; i--)
+        {
             sessionNumLabel[i]->setStyleSheet(sessionNum_off);
         }
-            sessionNumLabel[numToFlash]->setStyleSheet(sessionNum_on[numToFlash]);
-     }
-    else{
-        softAnimationtTimer->stop();
-        softAnimation =0;
-        sessionNumLabel[0]->setStyleSheet(sessionNum_off);
 
+        sessionNumLabel[numToFlash]->setStyleSheet(sessionNum_on[numToFlash]);
     }
+    else
+    {
+        softAnimationtTimer->stop();
+        softAnimation = 0;
+        sessionNumLabel[0]->setStyleSheet(sessionNum_off);
+    }
+
     numToFlash--;
 }
 
 void MainWindow::savingAnimation()
 {
-    std::cout<<"Intensity: "<<intensityLvl<<" : "<<floor(intensityLvl)<<std::endl;
-    int leveltoFlash = floor(intensityLvl)-1;
-    if(leveltoFlash<0)
-        return;
+    //std::cout<<"Intensity: " << currentSession->getIntensity() << " : " << floor(currentSession->getIntensity()) << std::endl;
 
-    if(flashIntensity)
+    int leveltoFlash = floor(currentSession->getIntensity()) - 1;
+
+    if (leveltoFlash < 0)
+    {
+        return;
+    }
+
+    if (flashIntensity)
     {
         sessionNumLabel[leveltoFlash]->setStyleSheet(sessionNum_on[leveltoFlash]);
     }
@@ -716,7 +810,6 @@ void MainWindow::savingAnimation()
 
     flashIntensity = !flashIntensity;
 }
-
 
 void MainWindow::stopFlashing()
 {

@@ -35,13 +35,11 @@ class MainWindow : public QMainWindow
         bool skinConnection;
         bool badConnection;
         bool connectionButtonsLit;
+        bool flashIntensity;
         double batteryLvl; // battery level ranging from 0-100
-        float intensityLvl; // current session intensity level
         int elaspedTime; // elasped time for the current session, increases by one on each timeout call by currentSessionTimer
         int numToFlash;
         int softAnimation;
-        bool flashIntensity;
-
 
         // TODO: currentState -> track device state, (0 = just powered on, 1 = session running, etc), more may be needed later
 
@@ -129,7 +127,7 @@ class MainWindow : public QMainWindow
         void onBatteryLow();
 
         /// Set currentSession and start currentSessionTimer
-        void startSession(Session* s);
+        void startSession();
 
         /// End currentSession and currentSessionTimer
         void endSession();
@@ -155,12 +153,8 @@ class MainWindow : public QMainWindow
         /// Deplete batteryLvl by a variable level depending on length, intensity, and skin connection
         void depleteBattery();
 
-        ///
         void softOn();
-
-
         void softOff();
-
         void savingAnimation();
 
     private slots:
@@ -191,7 +185,6 @@ class MainWindow : public QMainWindow
         void stopConnectionTest();
 
         void blinkNum();
-
         void stopFlashing();
 };
 #endif // MAINWINDOW_H
