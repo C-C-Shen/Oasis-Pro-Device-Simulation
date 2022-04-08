@@ -27,16 +27,16 @@
  ## TODO
 - User Designated Time
 - Remove Extra UI
-- Battery Function
-- Rearrange Drain Battery
-- Soft On Animation (1-8 using timers) If interrupted after the connection test, do not load saved preferences 
-- Soft Off Animation (8-1 using timers) when powering off
+- Battery Function - Gurpiar (Done)
+- Rearrange Drain Battery - Gurpiar (Done)
+- Soft On Animation (1-8 using timers) If interrupted after the connection test, do not load saved preferences -Gurpiar (Done)
+- Soft Off Animation (8-1 using timers) when powering off -Gurpiar (Done)
 - Memory Mangement
-- Fix new Session (when user designated) in ConfirmButtonRelease
+- Fix new Session (when user designated) in ConfirmButtonRelease - done?
 - Some UI updates such as:
-  - Intenisty number blinking when adjusted
-  - Saving intensity animation
+  - Intenisty number blinking when adjusted -Gurpiar (Done)
   - Record button icon - Kayla
   - Indicate selected session with blinking number
 - Sequence Diagrams - Kayla
+- Tracability Diagram - Kayla
 - UML Diagram - Kayla
