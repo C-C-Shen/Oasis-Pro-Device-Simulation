@@ -25,12 +25,12 @@
  
  
  ## TODO
-- User Designated Time
+- User Designated Time - Chris (Done)
 - Remove Extra UI - Kayla (Done)
 - Battery Function - Gurpiar (Done)
 - Rearrange Drain Battery - Gurpiar (Done)
-- Soft On Animation (1-8 using timers) If interrupted after the connection test, do not load saved preferences -Gurpiar (Done)
-- Soft Off Animation (8-1 using timers) when powering off -Gurpiar (Done)
+- Soft On Animation (1-8 using timers) If interrupted after the connection test, do not load saved preferences -G urpiar (Done)
+- Soft Off Animation (8-1 using timers) when powering off - Gurpiar (Done)
 - Memory Mangement - Kayla (Done)
 - Fix new Session (when user designated) in ConfirmButtonRelease - done?
 - Some UI updates such as:
