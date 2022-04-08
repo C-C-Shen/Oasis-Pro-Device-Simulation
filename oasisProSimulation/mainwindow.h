@@ -40,6 +40,8 @@ class MainWindow : public QMainWindow
         int elaspedTime; // elasped time for the current session, increases by one on each timeout call by currentSessionTimer
         int numToFlash;
         int softAnimation;
+        int createUserDesignated; // 0 = not in mode, 1 = setting type, 2 = setting duration.
+        int customLength; // used to set user designated session length
 
         // TODO: currentState -> track device state, (0 = just powered on, 1 = session running, etc), more may be needed later
 
@@ -156,6 +158,9 @@ class MainWindow : public QMainWindow
         void softOn();
         void softOff();
         void savingAnimation();
+
+        /// Helper to display correct bar level on 0 to 8 labels
+        void display0To8Level(int levelToDisplay);
 
     private slots:
         // button handling

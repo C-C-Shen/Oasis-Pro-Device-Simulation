@@ -200,13 +200,15 @@ void MainWindow::powerButtonRelease()
         {
             std::cout << "Powering On" << std::endl;
             this->powerOn = true;
+            createUserDesignated = 0;
+            customLength = 0;
             handlePowerOn();
             displaySessionSelect();
         }
 
         std::cout << "Device power state: " << this->powerOn << std::endl;
     }
-    else if (this->powerOn && !testConnectionTimer->isActive())
+    else if (this->powerOn && !testConnectionTimer->isActive() && !createUserDesignated)
     {
         std::cout << "Normal Press" << std::endl;
         switchGroups();
@@ -214,8 +216,11 @@ void MainWindow::powerButtonRelease()
     }
     else
     {
-        // indicate the need for power on first
-        std::cout << "Long press to turn on" << std::endl;
+        if (!this->powerOn) {
+            std::cout << "Long press to turn on" << std::endl;
+        } else {
+            std::cout << "Cannot change group in when in user designated mode" << std::endl;
+        }
     }
 }
 
@@ -278,6 +283,14 @@ void MainWindow::upButtonPress()
             softAnimationtTimer->start(250);
             displayIntensityLevel();
         }
+        else if (createUserDesignated == 2)
+        {
+            // change custom length for user designated session
+            if (customLength < 8) {
+                customLength++;
+            }
+            display0To8Level(customLength);
+        }
         else
         {
             switchType(1);
@@ -305,6 +318,14 @@ void MainWindow::downButtonPress()
             softAnimation = 3;
             softAnimationtTimer->start(250);
             displayIntensityLevel();
+        }
+        else if (createUserDesignated == 2)
+        {
+            // change custom length for user designated session
+            if (customLength > 0) {
+                customLength--;
+            }
+            display0To8Level(customLength);
         }
         else
         {
@@ -334,24 +355,78 @@ void MainWindow::confirmButtonRelease()
     if (elapsed >= 1000 && (currentSession != NULL))
     {
         // Long Press to save preference
+        std::cout << typePosition << std::endl;
+
+        if (lengthPosition == 2 && sessions[2].size() == 1) {
+            typePosition = 0;
+        }
+
         sessions[lengthPosition][typePosition]->setIntensity(currentSession->getIntensity());
         std::cout << "Intensity Saved: " <<sessions[lengthPosition][typePosition]->getIntensity()<< std::endl;
     }
+    else if (elapsed >= 1000 && createUserDesignated)
+    {
+        std::cout << "Exiting User Designated Mode" << std::endl;
+        createUserDesignated = 0;
+        customLength = 0;
+        displaySessionSelect();
+    }
+    else if (elapsed >= 1000 && lengthPosition == 2)
+    {
+        // Long Press while selecting user designated to create a user designated session
+
+        // TODO: should there be a way to overwrite/delet old sessions if we want new ones but already have 8 slots filled
+        if (sessions.size() == 3) {
+            if (sessions[2].size() >= 8) {
+                std::cout << "No more slots left for user designated sessions" << std::endl;
+            }
+        }
+        std::cout << "Entering User Designated Mode" << std::endl;
+        createUserDesignated = 1;
+    }
+    else if (createUserDesignated == 1)
+    {
+        // Type for the user designated session has been set
+        std::cout << "User Designated Type Set: " << typePosition << std::endl;
+        display0To8Level(0);
+        createUserDesignated = 2;
+    }
     else if (powerOn && (currentSession == NULL))
     {
-        std::cout << "Normal Press" << std::endl;
+        // 0, 1 mean pre-defined groups or 2 for saved user designated sessions
+        if (createUserDesignated == 2)
+            {
+                // Length (duration) for the user designated session has been set
+                std::cout << "Created User Designated Session" << std::endl;
 
-        // 0, 1 mean pre-defined groups
-        if (lengthPosition != 2)
+                // TODO: set the new session
+                QVector<QString> t = {"Sub Delta", "Delta", "Alpha", "Theta"};
+                QVector<QString> f = {"1.75", "3.75", "7", "10"}; // types are actually just sessions (sub delta, delta, etc)
+
+                // if this is the first custom user session, create a new vector
+                if (sessions.size() < 3) {
+                    QVector<Session *> newVector;
+                    sessions.push_back(newVector);
+                }
+
+                // minimum length is 20, and increases in 20 minute intervals
+                Session *newS = new Session(QString::number(20+customLength*20),t[typePosition],f[typePosition],0);
+                sessions[2].push_back(newS);
+
+                currentSession = new Session(newS);
+
+                createUserDesignated = 0;
+                customLength = 0;
+            }
+        else if (lengthPosition != 2 || sessions.size() == 3)
         {
-            std::cout << "Pre-defined group selected" << std::endl;
+            std::cout << "Session selected" << std::endl;
             currentSession = new Session(sessions[lengthPosition][typePosition]);
         }
         else
         {
-            // TODO: this will need to be replaced with how s is set above when user designated is done
-            // these are place holder values for now
-            currentSession = new Session("20", "PLACEHOLDER", "5", 0);
+            std::cout << "No user designated sessions" << std::endl;
+            return;
         }
 
         startSession();
@@ -443,8 +518,7 @@ void MainWindow::updateTime()
         stopFlashing();
         displayBatteryLevel();
     }
-    else
-    {
+    else    {
         displayIntensityLevel();
     }
 }
@@ -474,26 +548,14 @@ void MainWindow::displayBatteryLevel()
         levelToDisplay = 1;
     }
 
-    for (int i = 0; i < levelToDisplay; i++) {
-        sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
-    }
-    for (std::size_t i = levelToDisplay; i < sessionNumLabel.size(); i++) {
-        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
-    }
+    display0To8Level(levelToDisplay);
 }
 
 void MainWindow::displayIntensityLevel()
 {
     int levelToDisplay = floor(currentSession->getIntensity()); // round intensity level down (6.5 displays 6, 5.5, displays 5, etc.)
 
-    for (int i = 0; i < levelToDisplay; i++)
-    {
-        sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
-    }
-    for (std::size_t i = levelToDisplay; i < sessionNumLabel.size(); i++)
-    {
-        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
-    }
+    display0To8Level(levelToDisplay);
 }
 
 void MainWindow::displaySessionSelect()
@@ -598,18 +660,39 @@ void MainWindow::switchType(int direction)
 
     typePosition += direction;
 
-    // for types, every iteration is either +1 or -1, if out of bounds, wrap around.
-    if (typePosition > (int)sessionTypeLabel.size() - 1)
-    {
-        typePosition = 0;
-    }
-    else if (typePosition < 0)
-    {
-        typePosition = sessionTypeLabel.size() - 1;
-    }
-
     // turn "on" selected type label
-    sessionTypeLabel[typePosition]->setPixmap(sessionType_on[typePosition]);
+    if (lengthPosition == 2 && sessions.size() == 3 && createUserDesignated == 0) {
+        // custom for displaying the user designated ones
+
+        // for types, every iteration is either +1 or -1, if out of bounds, wrap around.
+        if (typePosition > (int)sessions[2].size() - 1)
+        {
+            typePosition = 0;
+        }
+        else if (typePosition < 0)
+        {
+            typePosition = sessions[2].size() - 1;
+        }
+
+        QVector<QString> t = {"Sub Delta", "Delta", "Alpha", "Theta"};
+        QString type = sessions[2][typePosition]->getType();
+        for (int i = 0; i < t.size(); i++) {
+            if (type == t[i]) {
+                sessionTypeLabel[i]->setPixmap(sessionType_on[i]);
+            }
+        }
+    } else {
+        // for types, every iteration is either +1 or -1, if out of bounds, wrap around.
+        if (typePosition > (int)sessionTypeLabel.size() - 1)
+        {
+            typePosition = 0;
+        }
+        else if (typePosition < 0)
+        {
+            typePosition = sessionTypeLabel.size() - 1;
+        }
+        sessionTypeLabel[typePosition]->setPixmap(sessionType_on[typePosition]);
+    }
 }
 
 bool MainWindow::testConnection()
@@ -813,6 +896,11 @@ void MainWindow::stopFlashing()
     softAnimationtTimer->stop();
 }
 
-
-
-
+void MainWindow::display0To8Level(int levelToDisplay) {
+    for (int i = 0; i < levelToDisplay; i++) {
+        sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
+    }
+    for (std::size_t i = levelToDisplay; i < sessionNumLabel.size(); i++) {
+        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
+    }
+}
