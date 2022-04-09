@@ -37,7 +37,7 @@
   - Intenisty number blinking when adjusted -Gurpiar (Done)
   - Record button icon - Kayla (Done)
   - L/R icons different colours based on connection - Kayla (Done)
-  - Indicate selected session with blinking number - Kayla (Done)
+  - Indicate selected session with blinking number - Chris (Done)
 - Sequence Diagrams - Kayla
 - Tracability Diagram - Kayla (Done)
 - UML Diagram - Kayla (Mostly Done)
