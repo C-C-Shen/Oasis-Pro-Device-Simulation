@@ -13,7 +13,7 @@
 ## File Organization
 - The source and header files are in the oasisProSimulation folder.
 - The icon resources are in oasisProSimulation/resources.
-- The design documentation (UML, Use Cases, etc.) is in the Design Documentation folder.
+- The design documentation files (UML, Use Cases, etc.) are in the Design Documentation folder seperately.
 
 ## Tested Scenarios (all functional)
 - Power On
@@ -24,7 +24,7 @@
   - Run a session and observe as the battery level lowers. There will be a battery low warning.
 - Selecting a session
    - There are 3 groups (20min, 45min, and user designated)
-   - There are 4 session types (Delta, Sub Delta, Alpha, and Beta)
+   - There are 4 session types (Delta, Sub Delta, Alpha, and Theta)
    - Press the power button while the device is powered on to shuffle groups
    - Press the up/down arrows while the device is powered on to shuffle session types
  - Connection Test
@@ -38,7 +38,7 @@
    - Press the record button during a session. The session information will be added to the recording .txt file.
 
   ## Base Scenario
- - Hold the Power button for 2 Seconds to power on the device
+ - Hold the Power button for 2 seconds to power on the device
  - Press the Power button to shuffle through session groups
  - Press the Up/Down arrows to shuffle through session types
  - Toggle Skin Connection to attach clips to earloabs
