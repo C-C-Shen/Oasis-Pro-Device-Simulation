@@ -15,7 +15,7 @@
 - The icon resources are in oasisProSimulation/resources.
 - The design documentation (UML, Use Cases, etc.) is in the Design Documentation folder.
 
-## Tested Scenarios
+## Tested Scenarios (all functional)
 - Power On
   - Hold the Power button for 2 seconds while the device is off to turn on the device
 - Power Off
