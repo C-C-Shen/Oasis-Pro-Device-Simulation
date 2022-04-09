@@ -18,7 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
     skinConnection = false;
     connectionButtonsLit = false;
     badConnection = false;
-    flashIntensity = false;
+//    flashIntensity = false;
+    flashValue = false;
     batteryLvl = 100.00;
     elaspedTime = 0;
     numToFlash = 0;
@@ -203,6 +204,14 @@ void MainWindow::powerButtonRelease()
             createUserDesignated = 0;
             customLength = 0;
             handlePowerOn();
+
+            // on power on, flash initial session selected
+            if (lengthPosition != 2 || sessions.size() == 3) {
+                softAnimation = 4;
+                softAnimationtTimer->start(250);
+            } else {
+                softAnimationtTimer->stop();
+            }
             displaySessionSelect();
         }
 
@@ -294,6 +303,12 @@ void MainWindow::upButtonPress()
         else
         {
             switchType(1);
+            // only flash sessions if there are available ones that are currently selected
+            if (lengthPosition != 2 || sessions.size() == 3) {
+                softAnimation = 4;
+                softAnimationtTimer->start(250);
+            }
+            displaySessionSelect();
         }
     }
 }
@@ -330,6 +345,12 @@ void MainWindow::downButtonPress()
         else
         {
             switchType(-1);
+            // only flash sessions if there are available ones that are currently selected
+            if (lengthPosition != 2 || sessions.size() == 3) {
+                softAnimation = 4;
+                softAnimationtTimer->start(250);
+            }
+            displaySessionSelect();
         }
     }
 }
@@ -518,7 +539,8 @@ void MainWindow::updateTime()
         stopFlashing();
         displayBatteryLevel();
     }
-    else    {
+    else
+    {
         displayIntensityLevel();
     }
 }
@@ -648,6 +670,15 @@ void MainWindow::switchGroups()
 
     // turn "on" selected group label
     sessionLengthLabel[lengthPosition]->setPixmap(sessionLength_on[lengthPosition]);
+
+    // on switching group, go to default type/session position and flash selection
+    typePosition = 0;
+    if (lengthPosition != 2 || sessions.size() == 3) {
+        softAnimation = 4;
+        softAnimationtTimer->start(250);
+    } else {
+        softAnimationtTimer->stop();
+    }
 }
 
 void MainWindow::switchType(int direction)
@@ -825,6 +856,10 @@ void MainWindow::blinkNum()
     {
         savingAnimation();
     }
+    else if (softAnimation == 4)
+    {
+        sessionAnimation();
+    }
 }
 
 void MainWindow::softOn()
@@ -870,7 +905,7 @@ void MainWindow::softOff()
 
 void MainWindow::savingAnimation()
 {
-    //std::cout<<"Intensity: " << currentSession->getIntensity() << " : " << floor(currentSession->getIntensity()) << std::endl;
+//    std::cout<<"Intensity: " << currentSession->getIntensity() << " : " << floor(currentSession->getIntensity()) << std::endl;
 
     int leveltoFlash = floor(currentSession->getIntensity()) - 1;
 
@@ -879,16 +914,12 @@ void MainWindow::savingAnimation()
         return;
     }
 
-    if (flashIntensity)
-    {
-        sessionNumLabel[leveltoFlash]->setStyleSheet(sessionNum_on[leveltoFlash]);
-    }
-    else
-    {
-        sessionNumLabel[leveltoFlash]->setStyleSheet(sessionNum_off);
-    }
+    flash0To8Level(leveltoFlash);
+}
 
-    flashIntensity = !flashIntensity;
+void MainWindow::sessionAnimation()
+{
+    flash0To8Level(typePosition);
 }
 
 void MainWindow::stopFlashing()
@@ -903,4 +934,17 @@ void MainWindow::display0To8Level(int levelToDisplay) {
     for (std::size_t i = levelToDisplay; i < sessionNumLabel.size(); i++) {
         sessionNumLabel[i]->setStyleSheet(sessionNum_off);
     }
+}
+
+void MainWindow::flash0To8Level(int valueToFlash) {
+    if (flashValue)
+    {
+        sessionNumLabel[valueToFlash]->setStyleSheet(sessionNum_on[valueToFlash]);
+    }
+    else
+    {
+        sessionNumLabel[valueToFlash]->setStyleSheet(sessionNum_off);
+    }
+
+    flashValue = !flashValue;
 }

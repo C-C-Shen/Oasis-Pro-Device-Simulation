@@ -35,7 +35,8 @@ class MainWindow : public QMainWindow
         bool skinConnection;
         bool badConnection;
         bool connectionButtonsLit;
-        bool flashIntensity;
+//        bool flashIntensity;
+        bool flashValue;
         double batteryLvl; // battery level ranging from 0-100
         int elaspedTime; // elasped time for the current session, increases by one on each timeout call by currentSessionTimer
         int numToFlash;
@@ -157,10 +158,14 @@ class MainWindow : public QMainWindow
 
         void softOn();
         void softOff();
+        void sessionAnimation();
         void savingAnimation();
 
         /// Helper to display correct bar level on 0 to 8 labels
         void display0To8Level(int levelToDisplay);
+
+        /// Helper to flash the correct value on 0 to 8 labels
+        void flash0To8Level(int valueToFlash);
 
     private slots:
         // button handling
