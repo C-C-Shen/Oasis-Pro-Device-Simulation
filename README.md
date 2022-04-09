@@ -47,3 +47,10 @@
  - Recorded sessions can be view by manually locating .txt file in debug folder or pressing the print recorded sessions button (prints to console)
  - The user can hold the confirm button for 1 second during the session to save the intensity for that session preset
  - The device will power off after session is over or the power button is held
+
+## TODO
+- Sequence Diagram
+- UML
+- Design pattern (state?) or adjust MainWindow to contain less stuff?
+- Fix flashing numbers overlapping when confirm pressed
+- Fix intensity being changeable when skin is not connected
