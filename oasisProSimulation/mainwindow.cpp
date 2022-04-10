@@ -97,7 +97,6 @@ void MainWindow::powerButtonRelease()
         if (this->powerOn)
         {
             // if the device is powered off before a session completes, record first
-            // TODO: should we also record if the session was interupted or not?
             if(recorder.getPending())
             {
                 recorder.recordSession(currentSession, false);
@@ -265,7 +264,6 @@ void MainWindow::downButtonPress()
 
 void MainWindow::confirmButtonPress()
 {
-    // TODO: long press should save current intensity value to the session being run
     if (powerOn)
     {
         this->elapsedTimerConfirm.start();
@@ -328,7 +326,6 @@ void MainWindow::confirmButtonRelease()
                 // Length (duration) for the user designated session has been set
                 std::cout << "Created User Designated Session" << std::endl;
 
-                // TODO: set the new session
                 QVector<QString> t = {"Sub Delta", "Delta", "Alpha", "Theta"};
                 QVector<QString> f = {"1.75", "3.75", "7", "10"}; // types are actually just sessions (sub delta, delta, etc)
 
@@ -374,7 +371,6 @@ void MainWindow::confirmButtonRelease()
 
 void MainWindow::recordButtonPress()
 {
-    // TODO: implement recording
     std::cout << "Record button pressed" << std::endl;
 
     if (currentSession != NULL)

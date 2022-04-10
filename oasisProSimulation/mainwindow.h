@@ -44,8 +44,6 @@ class MainWindow : public QMainWindow
         int createUserDesignated; // 0 = not in mode, 1 = setting type, 2 = setting duration.
         int customLength; // used to set user designated session length
 
-        // TODO: currentState -> track device state, (0 = just powered on, 1 = session running, etc), more may be needed later
-
         // variables holding specific positions for vectors
         int lengthPosition = 0;
         int typePosition = 0;
@@ -66,9 +64,8 @@ class MainWindow : public QMainWindow
 
         // vector of pairs of strings to session pointer vectors
         /* General Structure
-         * Outer vector stores pairs, 0 = "20", 1 = "45", 2 = "User" (ie, grouped by lengths)
-         * Inner vector stores pointers to sessions within the pairs
-         * In this case, sessions found under "20" and "45" are the pre-defined default sessions, "User" is empty to start
+         * Outer vector stores vector grouped by lengths
+         * In this case, sessions found under 0 = "20" and 1 = "45" are the pre-defined default sessions, 2 = "User" is empty to start
          */
         QVector<QVector<Session *>> sessions; // all possible sessions
 
