@@ -16,6 +16,7 @@
 
 #include "recording.h"
 #include "session.h"
+#include "displaymanager.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -35,7 +36,6 @@ class MainWindow : public QMainWindow
         bool skinConnection;
         bool badConnection;
         bool connectionButtonsLit;
-//        bool flashIntensity;
         bool flashValue;
         double batteryLvl; // battery level ranging from 0-100
         int elaspedTime; // elasped time for the current session, increases by one on each timeout call by currentSessionTimer
@@ -53,6 +53,7 @@ class MainWindow : public QMainWindow
         QString fileName = "treatment_history.txt";
 
         Recording recorder;
+        DisplayManager *dm;
 
         QElapsedTimer elapsedTimer;
         QElapsedTimer elapsedTimerConfirm;        //For the Confirm Button to save or start session
@@ -71,57 +72,14 @@ class MainWindow : public QMainWindow
          */
         QVector<QVector<Session *>> sessions; // all possible sessions
 
-        // vector of QLabel objects, to help iterate over which to turn on and off
-        std::vector<QLabel *> sessionLengthLabel;
-        std::vector<QLabel *> sessionTypeLabel;
-        std::vector<QLabel *> sessionNumLabel;
-        std::vector<QLabel *> sessionStimLabel;
-
-        // have the "lights" be stored in vectors corresponding to their groups
-        // Positions: 0 -> 20, 1 -> 45, 2 -> user def
-        std::vector<QPixmap> sessionLength_on;
-        std::vector<QPixmap> sessionLength_off;
-
-        // Positions: 0 -> sub delta, 1 -> delta, 2 -> theta, 3 -> alpha
-        std::vector<QPixmap> sessionType_on;
-        std::vector<QPixmap> sessionType_off;
-
-        // Positions: 0 -> 1, 1 -> 2, ... 7 -> 8
-        std::vector<QString> sessionNum_on;
-        QString sessionNum_off;
-
-        // Positions: 0 -> 0.25, 1 -> 0.50, ...6 -> +1, 7 -> +2
-        std::vector<QPixmap> sessionStim_on;
-        std::vector<QPixmap> sessionStim_off;
-
-        QPixmap L_on_green;
-        QPixmap L_on_yellow;
-        QPixmap L_on_red;
-        QPixmap L_off;
-        QPixmap R_on_green;
-        QPixmap R_on_yellow;
-        QPixmap R_on_red;
-        QPixmap R_off;
-        QPixmap dutyCES_on;
-        QPixmap dutyCES_off;
-        QPixmap shortCES_on;
-        QPixmap shortCES_off;
-
         // functions
-
         /// Handle power on
         void handlePowerOn();
 
         /// Handle power off
         void handlePowerOff();
 
-        /// Display the current battery level using session number labels
-        void displayBatteryLevel();
-
-        /// Display the current Intensity level using session number labels
-        void displayIntensityLevel();
-
-        /// Light up session numbers that have available sessions to select
+        /// Helper function to call the actual display function with correct parameters
         void displaySessionSelect();
 
         /// Notify user when batteryLvl is low
@@ -156,14 +114,7 @@ class MainWindow : public QMainWindow
 
         void softOn();
         void softOff();
-        void sessionAnimation();
         void savingAnimation();
-
-        /// Helper to display correct bar level on 0 to 8 labels
-        void display0To8Level(int levelToDisplay);
-
-        /// Helper to flash the correct value on 0 to 8 labels
-        void flash0To8Level(int valueToFlash);
 
     private slots:
         // button handling

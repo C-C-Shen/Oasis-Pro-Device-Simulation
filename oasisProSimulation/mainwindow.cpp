@@ -16,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent)
     skinConnection = false;
     connectionButtonsLit = false;
     badConnection = false;
-//    flashIntensity = false;
     flashValue = false;
     batteryLvl = 100.00;
     elaspedTime = 0;
@@ -60,75 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
         sessions.push_back(newVector);
     }
 
-    // Initializing vector pixmaps
-    sessionLength_on.push_back(QPixmap(":/icons/20min_on.png"));
-    sessionLength_on.push_back(QPixmap(":/icons/45min_on.png"));
-    sessionLength_on.push_back(QPixmap(":/icons/userdesigned_on.png"));
-    sessionLength_off.push_back(QPixmap(":/icons/20min_off.png"));
-    sessionLength_off.push_back(QPixmap(":/icons/45min_off.png"));
-    sessionLength_off.push_back(QPixmap(":/icons/userdesigned_off.png"));
-
-    sessionType_on.push_back(QPixmap(":/icons/subdelta_on.png"));
-    sessionType_on.push_back(QPixmap(":/icons/delta_on.png"));
-    sessionType_on.push_back(QPixmap(":/icons/theta_on.png"));
-    sessionType_on.push_back(QPixmap(":/icons/alpha_on.png"));
-    sessionType_off.push_back(QPixmap(":/icons/subdelta_off.png"));
-    sessionType_off.push_back(QPixmap(":/icons/delta_off.png"));
-    sessionType_off.push_back(QPixmap(":/icons/theta_off.png"));
-    sessionType_off.push_back(QPixmap(":/icons/alpha_off.png"));
-
-    sessionNum_on.push_back("QLabel { color: #26ff00 }");
-    sessionNum_on.push_back("QLabel { color: #26ff00 }");
-    sessionNum_on.push_back("QLabel { color: #26ff00 }");
-    sessionNum_on.push_back("QLabel { color: #fff700 }");
-    sessionNum_on.push_back("QLabel { color: #fff700 }");
-    sessionNum_on.push_back("QLabel { color: #fff700 }");
-    sessionNum_on.push_back("QLabel { color: #ff0000 }");
-    sessionNum_on.push_back("QLabel { color: #ff0000 }");
-    sessionNum_off = "QLabel { color: #000000 }";
-
-    // Initialize UI label vector pointers
-    sessionLengthLabel.push_back(ui->sessionLength20);
-    sessionLengthLabel.push_back(ui->sessionLength45);
-    sessionLengthLabel.push_back(ui->sessionLengthCustom);
-
-    sessionTypeLabel.push_back(ui->sessionSubDelta);
-    sessionTypeLabel.push_back(ui->sessionDelta);
-    sessionTypeLabel.push_back(ui->sessionTheta);
-    sessionTypeLabel.push_back(ui->sessionAlpha);
-
-
-    sessionNumLabel.push_back(ui->session1);
-    sessionNumLabel.push_back(ui->session2);
-    sessionNumLabel.push_back(ui->session3);
-    sessionNumLabel.push_back(ui->session4);
-    sessionNumLabel.push_back(ui->session5);
-    sessionNumLabel.push_back(ui->session6);
-    sessionNumLabel.push_back(ui->session7);
-    sessionNumLabel.push_back(ui->session8);
-
-    sessionStimLabel.push_back(ui->dcStimLevel1);
-    sessionStimLabel.push_back(ui->dcStimLevel2);
-    sessionStimLabel.push_back(ui->dcStimLevel3);
-    sessionStimLabel.push_back(ui->dcStimLevel4);
-    sessionStimLabel.push_back(ui->dcStimLevel5);
-    sessionStimLabel.push_back(ui->dcStimLevel6);
-    sessionStimLabel.push_back(ui->dcStimUserDesigned1);
-    sessionStimLabel.push_back(ui->dcStimUserDesigned1);
-
-    // Initializing pixmaps
-    L_on_green = QPixmap(":/icons/L_on_green.png");
-    L_on_yellow = QPixmap(":/icons/L_on_yellow.png");
-    L_on_red = QPixmap(":/icons/L_on_red.png");
-    L_off = QPixmap(":/icons/L_off.png");
-    R_on_green = QPixmap(":/icons/R_on_green.png");
-    R_on_yellow = QPixmap(":/icons/R_on_yellow.png");
-    R_on_red = QPixmap(":/icons/R_on_red.png");
-    R_off = QPixmap(":/icons/R_off.png");
-    dutyCES_on = QPixmap(":/icons/dutyCES_on.png");
-    dutyCES_off = QPixmap(":/icons/dutyCES_off.png");
-    shortCES_on = QPixmap(":/icons/shortCES_on.png");
-    shortCES_off = QPixmap(":/icons/shortCES_off.png");
+    dm = new DisplayManager(ui);
 }
 
 MainWindow::~MainWindow()
@@ -146,26 +77,7 @@ MainWindow::~MainWindow()
         }
     }
 
-    for (int i = 0; i < (int)sessionLengthLabel.size(); i++)
-    {
-        delete sessionLengthLabel[i];
-    }
-
-    for (int i = 0; i < (int)sessionTypeLabel.size(); i++)
-    {
-        delete sessionTypeLabel[i];
-    }
-
-    for (int i = 0; i < (int)sessionNumLabel.size(); i++)
-    {
-        delete sessionNumLabel[i];
-    }
-
-    for (int i = 0; i < (int)sessionStimLabel.size(); i++)
-    {
-        delete sessionStimLabel[i];
-    }
-
+    delete dm;
     delete ui;
 }
 
@@ -247,8 +159,7 @@ void MainWindow::connectToSkin()
     {
         if(!skinConnection)
         {
-            ui->cesLeftLabel->setPixmap(L_on_red);
-            ui->cesRightLabel->setPixmap(R_on_red);
+            dm->connection(false);
             currentSessionTimer->stop();
         }
     }
@@ -257,8 +168,7 @@ void MainWindow::connectToSkin()
     {
         if(skinConnection)
         {
-            ui->cesLeftLabel->setPixmap(L_on_green);
-            ui->cesRightLabel->setPixmap(R_on_green);
+            dm->connection(true);
             currentSessionTimer->start(1000);
         }
     }
@@ -288,7 +198,7 @@ void MainWindow::upButtonPress()
 
             softAnimation = 3;
             softAnimationtTimer->start(250);
-            displayIntensityLevel();
+            dm->displayIntensityLevel(currentSession->getIntensity());
         }
         else if (createUserDesignated == 2)
         {
@@ -296,7 +206,7 @@ void MainWindow::upButtonPress()
             if (customLength < 8) {
                 customLength++;
             }
-            display0To8Level(customLength);
+            dm->display0To8Level(customLength);
         }
         else
         {
@@ -330,7 +240,7 @@ void MainWindow::downButtonPress()
 
             softAnimation = 3;
             softAnimationtTimer->start(250);
-            displayIntensityLevel();
+            dm->displayIntensityLevel(currentSession->getIntensity());
         }
         else if (createUserDesignated == 2)
         {
@@ -338,7 +248,7 @@ void MainWindow::downButtonPress()
             if (customLength > 0) {
                 customLength--;
             }
-            display0To8Level(customLength);
+            dm->display0To8Level(customLength);
         }
         else
         {
@@ -407,7 +317,7 @@ void MainWindow::confirmButtonRelease()
     {
         // Type for the user designated session has been set
         std::cout << "User Designated Type Set: " << typePosition << std::endl;
-        display0To8Level(0);
+        dm->display0To8Level(0);
         createUserDesignated = 2;
     }
     else if (powerOn && (currentSession == NULL))
@@ -535,11 +445,11 @@ void MainWindow::updateTime()
     if ((elaspedTime % 5) == 0)
     {
         stopFlashing();
-        displayBatteryLevel();
+        dm->displayBatteryLevel(batteryLvl);
     }
     else
     {
-        displayIntensityLevel();
+        dm->displayIntensityLevel(currentSession->getIntensity());
     }
 }
 
@@ -557,56 +467,23 @@ void MainWindow::depleteBattery()
     }
 }
 
-void MainWindow::displayBatteryLevel()
-{
-    // convert battery level to be out of 8 instead of 100, since we have 8 lights to show level
-    // needed since otherwise when battery below ~12% it would otherwise show no bars
-    int levelToDisplay = (batteryLvl * 0.8)/10;
-
-    if (levelToDisplay < 1)
-    {
-        levelToDisplay = 1;
-    }
-
-    display0To8Level(levelToDisplay);
-}
-
-void MainWindow::displayIntensityLevel()
-{
-    int levelToDisplay = floor(currentSession->getIntensity()); // round intensity level down (6.5 displays 6, 5.5, displays 5, etc.)
-
-    display0To8Level(levelToDisplay);
-}
-
 void MainWindow::displaySessionSelect()
 {
-    int availableToSelect = 0;
-
-    // if user defined sessions is empty, sessions.size() will possibly be 1 less than lengthPosition
-    if (sessions.size() > lengthPosition)
-    {
-        availableToSelect = sessions[lengthPosition].size();
+    if (sessions.size() > lengthPosition) {
+        dm->displaySessionSelect(lengthPosition, sessions.size(), sessions[lengthPosition].size());
+    } else {
+        dm->displaySessionSelect(lengthPosition, sessions.size(), 0);
     }
-    for (int i = 0; i < availableToSelect; i++)
-    {
-        sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
-    }
-    for (std::size_t i = availableToSelect; i < 8; i++)
-    {
-        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
-    }
-
-    // TODO: on selecting a session, flash the number to indicate selection before confirmation
 }
 
 void MainWindow::handlePowerOn()
 {
     // display device power level
-    displayBatteryLevel();
+    dm->displayBatteryLevel(batteryLvl);
 
     // light up default value labels
-    sessionLengthLabel[0]->setPixmap(sessionLength_on[0]);
-    sessionTypeLabel[0]->setPixmap(sessionType_on[0]);
+    dm->lengthOn(lengthPosition);
+    dm->typeOn(typePosition);
 
     // light up LED strip
     ui->ledLabel->setStyleSheet("background-color:green");
@@ -627,47 +504,28 @@ void MainWindow::handlePowerOff()
     numToFlash = 7;
     softAnimationtTimer->start(250);
 
-    //TODO: Reset menu select options. When the powered up again the menu jumps to the a select since no reset.
-
     // update interface
-    for (std::size_t i = 0; i < sessionLengthLabel.size(); i++)
-    {
-        sessionLengthLabel[i]->setPixmap(sessionLength_off[i]);
-    }
-    for (std::size_t i = 0; i < sessionTypeLabel.size(); i++)
-    {
-        sessionTypeLabel[i]->setPixmap(sessionType_off[i]);
-    }
-    for (std::size_t i = 0; i < sessionNumLabel.size(); i++)
-    {
-        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
-    }
-
-    ui->ledLabel->setStyleSheet("background-color:white");
-    ui->cesLeftLabel->setPixmap(L_off);
-    ui->cesRightLabel->setPixmap(R_off);
-    ui->cesShortLabel->setPixmap(shortCES_off);
-    ui->cesDutyLabel->setPixmap(dutyCES_off);
+    dm->lightsOff();
 }
 
 void MainWindow::switchGroups()
 {
     // start by turning all appropriate labels "off"
-    for (std::size_t i = 0; i < sessionLengthLabel.size(); i++)
+    for (int i = 0; i < dm->getLengthLabelSize(); i++)
     {
-        sessionLengthLabel[i]->setPixmap(sessionLength_off[i]);
+        dm->lengthOff(i);
     }
 
     lengthPosition++;
 
     // for groups, every iteration just increments by 1, until end reached, then return to beginning
-    if (lengthPosition > (int)sessionLengthLabel.size() - 1)
+    if (lengthPosition > dm->getLengthLabelSize() - 1)
     {
         lengthPosition = 0;
     }
 
     // turn "on" selected group label
-    sessionLengthLabel[lengthPosition]->setPixmap(sessionLength_on[lengthPosition]);
+    dm->lengthOn(lengthPosition);
 
     // on switching group, go to default type/session position and flash selection
     typePosition = 0;
@@ -682,9 +540,9 @@ void MainWindow::switchGroups()
 void MainWindow::switchType(int direction)
 {
     // start by turning all appropriate labels "off"
-    for (std::size_t i = 0; i < sessionTypeLabel.size(); i++)
+    for (int i = 0; i < dm->getLengthLabelSize(); i++)
     {
-        sessionTypeLabel[i]->setPixmap(sessionType_off[i]);
+        dm->typeOff(i);
     }
 
     typePosition += direction;
@@ -707,20 +565,20 @@ void MainWindow::switchType(int direction)
         QString type = sessions[2][typePosition]->getType();
         for (int i = 0; i < t.size(); i++) {
             if (type == t[i]) {
-                sessionTypeLabel[i]->setPixmap(sessionType_on[i]);
+                dm->typeOn(i);
             }
         }
     } else {
         // for types, every iteration is either +1 or -1, if out of bounds, wrap around.
-        if (typePosition > (int)sessionTypeLabel.size() - 1)
+        if (typePosition > dm->getLengthLabelSize() - 1)
         {
             typePosition = 0;
         }
         else if (typePosition < 0)
         {
-            typePosition = sessionTypeLabel.size() - 1;
+            typePosition = dm->getLengthLabelSize() - 1;
         }
-        sessionTypeLabel[typePosition]->setPixmap(sessionType_on[typePosition]);
+        dm->typeOn(typePosition);
     }
 }
 
@@ -730,9 +588,9 @@ bool MainWindow::testConnection()
     testConnectionTimer->start(1000);
     testConnectionTimer->singleShot(5000, this, SLOT(stopConnectionTest()));
 
-    for (int i = 0; i < (int)sessionNumLabel.size(); i++)
+    for (int i = 0; i < dm->getLengthNumSize(); i++)
     {
-        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
+        dm->numberOff(i);
     }
 
     if (skinConnection)
@@ -741,20 +599,12 @@ bool MainWindow::testConnection()
         if ((rand() % 2) == 1)
         {
             // excellent connection
-            sessionNumLabel[0]->setStyleSheet(sessionNum_on[0]);
-            sessionNumLabel[1]->setStyleSheet(sessionNum_on[1]);
-            sessionNumLabel[2]->setStyleSheet(sessionNum_on[2]);
-            ui->cesLeftLabel->setPixmap(L_on_green);
-            ui->cesRightLabel->setPixmap(R_on_green);
+            dm->testConnectionLights(1);
         }
         else
         {
             // okay connection
-            sessionNumLabel[3]->setStyleSheet(sessionNum_on[3]);
-            sessionNumLabel[4]->setStyleSheet(sessionNum_on[4]);
-            sessionNumLabel[5]->setStyleSheet(sessionNum_on[5]);
-            ui->cesLeftLabel->setPixmap(L_on_yellow);
-            ui->cesRightLabel->setPixmap(R_on_yellow);
+            dm->testConnectionLights(2);
         }
 
         badConnection = false;
@@ -764,8 +614,7 @@ bool MainWindow::testConnection()
     {
         // no connection
         badConnection = true;
-        ui->cesLeftLabel->setPixmap(L_on_red);
-        ui->cesRightLabel->setPixmap(R_on_red);
+        dm->testConnectionLights(0);
         return false;
     }
 }
@@ -783,45 +632,7 @@ void MainWindow::flashConnection()
 
     QString tempFreq = currentSession->getFrequency();
 
-    // Flash duty or short CES depending on the select session
-    if (tempFreq == "1.75")
-    {
-        if (connectionButtonsLit)
-        {
-            ui->cesDutyLabel->setPixmap(dutyCES_off);
-        }
-        else
-        {
-            ui->cesDutyLabel->setPixmap(dutyCES_on);
-        }
-    }
-    else
-    {
-        if (connectionButtonsLit)
-        {
-            ui->cesShortLabel->setPixmap(shortCES_off);
-        }
-        else
-        {
-            ui->cesShortLabel->setPixmap(shortCES_on);
-        }
-    }
-
-    if (badConnection)
-    {
-        // flash bad connection on/off
-        if (connectionButtonsLit)
-        {
-            sessionNumLabel[6]->setStyleSheet(sessionNum_off);
-            sessionNumLabel[7]->setStyleSheet(sessionNum_off);
-        }
-        else
-        {
-            sessionNumLabel[6]->setStyleSheet(sessionNum_on[6]);
-            sessionNumLabel[7]->setStyleSheet(sessionNum_on[7]);
-        }
-    }
-
+    dm->flashConnection(tempFreq, connectionButtonsLit, badConnection);
     connectionButtonsLit = !connectionButtonsLit;
 }
 
@@ -830,13 +641,12 @@ void MainWindow::stopConnectionTest()
     // Stop connection test, reset vars, and attempt to initialize timer
     testConnectionTimer->stop();
     connectionButtonsLit = false;
-    ui->cesDutyLabel->setPixmap(dutyCES_off);
-    ui->cesShortLabel->setPixmap(shortCES_off);
+    dm->connectionTestOff();
 
     softAnimation = 1;
     numToFlash = 0;
     softAnimationtTimer->start(250);
-    displayIntensityLevel();
+    dm->displayIntensityLevel(currentSession->getIntensity());
     initializeTimer();
 }
 
@@ -856,7 +666,7 @@ void MainWindow::blinkNum()
     }
     else if (softAnimation == 4)
     {
-        sessionAnimation();
+        dm->flash0To8Level(typePosition, &flashValue);
     }
 }
 
@@ -866,10 +676,10 @@ void MainWindow::softOn()
     {
         for (int i = 0; i < 8; i++)
         {
-            sessionNumLabel[i]->setStyleSheet(sessionNum_off);
+            dm->numberOff(i);
         }
 
-        sessionNumLabel[numToFlash]->setStyleSheet(sessionNum_on[numToFlash]);
+        dm->numberOn(numToFlash);
     }
     else
     {
@@ -886,16 +696,16 @@ void MainWindow::softOff()
     {
         for (int i = 7; i > 0; i--)
         {
-            sessionNumLabel[i]->setStyleSheet(sessionNum_off);
+            dm->numberOff(i);
         }
 
-        sessionNumLabel[numToFlash]->setStyleSheet(sessionNum_on[numToFlash]);
+        dm->numberOn(numToFlash);
     }
     else
     {
         softAnimationtTimer->stop();
         softAnimation = 0;
-        sessionNumLabel[0]->setStyleSheet(sessionNum_off);
+        dm->numberOff(0);
     }
 
     numToFlash--;
@@ -912,37 +722,10 @@ void MainWindow::savingAnimation()
         return;
     }
 
-    flash0To8Level(leveltoFlash);
-}
-
-void MainWindow::sessionAnimation()
-{
-    flash0To8Level(typePosition);
+    dm->flash0To8Level(leveltoFlash, &flashValue);
 }
 
 void MainWindow::stopFlashing()
 {
     softAnimationtTimer->stop();
-}
-
-void MainWindow::display0To8Level(int levelToDisplay) {
-    for (int i = 0; i < levelToDisplay; i++) {
-        sessionNumLabel[i]->setStyleSheet(sessionNum_on[i]);
-    }
-    for (std::size_t i = levelToDisplay; i < sessionNumLabel.size(); i++) {
-        sessionNumLabel[i]->setStyleSheet(sessionNum_off);
-    }
-}
-
-void MainWindow::flash0To8Level(int valueToFlash) {
-    if (flashValue)
-    {
-        sessionNumLabel[valueToFlash]->setStyleSheet(sessionNum_on[valueToFlash]);
-    }
-    else
-    {
-        sessionNumLabel[valueToFlash]->setStyleSheet(sessionNum_off);
-    }
-
-    flashValue = !flashValue;
 }
