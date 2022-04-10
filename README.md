@@ -51,6 +51,6 @@
 ## TODO
 - Sequence Diagram
 - UML
-- Design pattern (state?) or adjust MainWindow to contain less stuff?
+- Design pattern (state?) or adjust MainWindow to contain less stuff? (Sort of Done, made class just for label handling, Chris)
 - Fix flashing numbers overlapping when confirm pressed (Done, Chris)
 - Fix intensity being changeable when skin is not connected
