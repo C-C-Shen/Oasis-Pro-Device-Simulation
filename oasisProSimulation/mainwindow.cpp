@@ -1,7 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <stdlib.h>
-#include <time.h>
 
 // helper function to nicely record the recorded session to a file.
 void recordToFile(Session * sToRecord);

@@ -7,12 +7,12 @@
 #include <QElapsedTimer>
 #include <QString>
 #include <QVector>
-#include <QPair>
 #include <iostream>
 #include <vector>
 #include <math.h>
-#include <fstream>
 #include <unistd.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "recording.h"
 #include "session.h"
@@ -108,8 +108,6 @@ class MainWindow : public QMainWindow
         QPixmap shortCES_off;
 
         // functions
-        /// Initialize sessions
-        void initSessions();
 
         /// Handle power on
         void handlePowerOn();
