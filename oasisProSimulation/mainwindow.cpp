@@ -358,6 +358,7 @@ void MainWindow::confirmButtonRelease()
             return;
         }
 
+        softAnimationtTimer->stop();
         startSession();
     }
     else if (currentSession != NULL)
