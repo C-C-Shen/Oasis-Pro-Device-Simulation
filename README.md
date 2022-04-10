@@ -52,5 +52,5 @@
 - Sequence Diagram
 - UML
 - Design pattern (state?) or adjust MainWindow to contain less stuff?
-- Fix flashing numbers overlapping when confirm pressed
+- Fix flashing numbers overlapping when confirm pressed (Done, Chris)
 - Fix intensity being changeable when skin is not connected
