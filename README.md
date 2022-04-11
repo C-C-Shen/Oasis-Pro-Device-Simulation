@@ -8,7 +8,9 @@
   - UI
   - Documentation
 - Christopher Shen
-  - TODO
+  - User Designated Sessions (Custom Time)
+  - Session Recording
+  - Back end for UI navigation
 
 ## File Organization
 - The source and header files are in the oasisProSimulation folder.
