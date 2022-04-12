@@ -128,7 +128,7 @@ void MainWindow::powerButtonRelease()
 
         std::cout << "Device power state: " << this->powerOn << std::endl;
     }
-    else if (this->powerOn && !testConnectionTimer->isActive() && !createUserDesignated)
+    else if (this->powerOn && !testConnectionTimer->isActive() && !createUserDesignated && !badConnection && !currentSessionTimer->isActive())
     {
         std::cout << "Normal Press" << std::endl;
         switchGroups();
@@ -162,6 +162,8 @@ void MainWindow::connectToSkin()
         {
             dm->connection(false);
             currentSessionTimer->stop();
+            testConnection();
+
         }
     }
 
@@ -169,6 +171,7 @@ void MainWindow::connectToSkin()
     {
         if(skinConnection)
         {
+            badConnection=false;
             dm->connection(true);
             currentSessionTimer->start(1000);
         }
@@ -177,6 +180,9 @@ void MainWindow::connectToSkin()
 
 void MainWindow::upButtonPress()
 {
+    if(badConnection)
+        return;
+
     if (powerOn && !testConnectionTimer->isActive())
     {
         std::cout << "Up button pressed" << std::endl;
@@ -224,6 +230,8 @@ void MainWindow::upButtonPress()
 
 void MainWindow::downButtonPress()
 {
+    if(badConnection)
+        return;
     if (powerOn && !testConnectionTimer->isActive())
     {
         std::cout << "Down button pressed" << std::endl;
@@ -281,7 +289,7 @@ void MainWindow::confirmButtonRelease()
         return;
     }
 
-    if (elapsed >= 1000 && (currentSession != NULL))
+    if (elapsed >= 1000 && (currentSession != NULL) && !badConnection)
     {
         // Long Press to save preference
         std::cout << typePosition << std::endl;
@@ -643,11 +651,17 @@ void MainWindow::stopConnectionTest()
     connectionButtonsLit = false;
     dm->connectionTestOff();
 
-    softAnimation = 1;
-    numToFlash = 0;
-    softAnimationtTimer->start(250);
-    dm->displayIntensityLevel(currentSession->getIntensity());
-    initializeTimer();
+
+    if(badConnection)
+        return;
+    else{
+
+        softAnimation = 1;
+        numToFlash = 0;
+        softAnimationtTimer->start(250);
+        dm->displayIntensityLevel(currentSession->getIntensity());
+        initializeTimer();
+    }
 }
 
 void MainWindow::blinkNum()
