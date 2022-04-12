@@ -65,6 +65,7 @@ public:
     void lightsOff();
 
     int getLengthLabelSize() { return (int)sessionLengthLabel.size(); }
+    int getTypeLabelSize() { return (int)sessionTypeLabel.size(); }
     int getLengthNumSize() { return (int)sessionNumLabel.size(); }
 
 private:

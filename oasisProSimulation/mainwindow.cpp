@@ -112,6 +112,8 @@ void MainWindow::powerButtonRelease()
             this->powerOn = true;
             createUserDesignated = 0;
             customLength = 0;
+            lengthPosition = 0;
+            typePosition = 0;
             handlePowerOn();
 
             // on power on, flash initial session selected
@@ -119,7 +121,7 @@ void MainWindow::powerButtonRelease()
                 softAnimation = 4;
                 softAnimationtTimer->start(250);
             } else {
-                softAnimationtTimer->stop();
+                stopFlashing();
             }
             displaySessionSelect();
         }
@@ -211,7 +213,7 @@ void MainWindow::upButtonPress()
         {
             switchType(1);
             // only flash sessions if there are available ones that are currently selected
-            if (lengthPosition != 2 || sessions.size() == 3) {
+            if ((lengthPosition != 2 || sessions.size() == 3) && createUserDesignated != 1) {
                 softAnimation = 4;
                 softAnimationtTimer->start(250);
             }
@@ -253,7 +255,7 @@ void MainWindow::downButtonPress()
         {
             switchType(-1);
             // only flash sessions if there are available ones that are currently selected
-            if (lengthPosition != 2 || sessions.size() == 3) {
+            if ((lengthPosition != 2 || sessions.size() == 3) && createUserDesignated != 1) {
                 softAnimation = 4;
                 softAnimationtTimer->start(250);
             }
@@ -310,6 +312,7 @@ void MainWindow::confirmButtonRelease()
         }
         std::cout << "Entering User Designated Mode" << std::endl;
         createUserDesignated = 1;
+        softAnimationtTimer->stop();
     }
     else if (createUserDesignated == 1)
     {
@@ -537,7 +540,7 @@ void MainWindow::switchGroups()
 void MainWindow::switchType(int direction)
 {
     // start by turning all appropriate labels "off"
-    for (int i = 0; i < dm->getLengthLabelSize(); i++)
+    for (int i = 0; i < dm->getTypeLabelSize(); i++)
     {
         dm->typeOff(i);
     }
@@ -567,13 +570,13 @@ void MainWindow::switchType(int direction)
         }
     } else {
         // for types, every iteration is either +1 or -1, if out of bounds, wrap around.
-        if (typePosition > dm->getLengthLabelSize() - 1)
+        if (typePosition > dm->getTypeLabelSize() - 1)
         {
             typePosition = 0;
         }
         else if (typePosition < 0)
         {
-            typePosition = dm->getLengthLabelSize() - 1;
+            typePosition = dm->getTypeLabelSize() - 1;
         }
         dm->typeOn(typePosition);
     }
