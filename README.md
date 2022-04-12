@@ -53,6 +53,9 @@
 ## TODO
 - Sequence Diagram
 - UML
+- Update Use Cases (todo on wednesday)
 - Design pattern (state?) or adjust MainWindow to contain less stuff? (Sort of Done, made class just for label handling, Chris)
 - Fix flashing numbers overlapping when confirm pressed (Done, Chris)
-- Fix intensity being changeable when skin is not connected
+- Fix intensity being changeable when skin is not connected (Done, Gurpiar)
+- Fix ear connection quality not being displayed after extended connection test is done
+- Fix Battery starts to drain before soft on is fully completed
