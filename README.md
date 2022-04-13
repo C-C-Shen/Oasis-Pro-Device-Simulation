@@ -52,7 +52,7 @@
 
 ## TODO
 - Sequence Diagram
-- UML
+- UML (Done, Kayla)
 - Update Use Cases (todo on wednesday)
 - Design pattern (state?) or adjust MainWindow to contain less stuff? (Sort of Done, made class just for label handling, Chris)
 - Fix flashing numbers overlapping when confirm pressed (Done, Chris)
