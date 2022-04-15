@@ -7,6 +7,7 @@
 - Kayla Gingras
   - UI
   - Documentation
+  - Connection Test
 - Christopher Shen
   - User Designated Sessions (Custom Time)
   - Session Recording
