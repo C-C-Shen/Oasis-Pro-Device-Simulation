@@ -51,9 +51,9 @@
  - The device will power off after session is over or the power button is held
 
 ## TODO
-- Sequence Diagram
+- Sequence Diagram (Done, Kayla)
 - UML (Done, Kayla)
-- Update Use Cases (todo on wednesday)
+- Update Use Cases (Done, Gurpiar)
 - Design pattern (state?) or adjust MainWindow to contain less stuff? (Sort of Done, made class just for label handling, Chris)
 - Fix flashing numbers overlapping when confirm pressed (Done, Chris)
 - Fix intensity being changeable when skin is not connected (Done, Gurpiar)
