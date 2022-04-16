@@ -51,12 +51,8 @@
  - The user can hold the confirm button for 1 second during the session to save the intensity for that session preset
  - The device will power off after session is over or the power button is held
 
-## TODO
-- Sequence Diagram (Done, Kayla)
-- UML (Done, Kayla)
-- Update Use Cases (Done, Gurpiar)
-- Design pattern (state?) or adjust MainWindow to contain less stuff? (Sort of Done, made class just for label handling, Chris)
-- Fix flashing numbers overlapping when confirm pressed (Done, Chris)
-- Fix intensity being changeable when skin is not connected (Done, Gurpiar)
-- Fix ear connection quality not being displayed after extended connection test is done
-- Fix Battery starts to drain before soft on is fully completed
+## Design Decisions
+- The device only drains battery while a session is running. This is because we interpreted the specifications to mean that battery only depletes during a therapy, even though real devices typically always have their battery draining.
+- User designated time has a minimum time of 20 minutes, and a maximum time of 3 hours and can be increased/decreased in 20 minute intervals. It was unclear how this element should be implemented so we capped the amount of time the user could select to 3 hours so that the device will be able to handle the amount of battery drained from the therapy.
+- For implementing Saving History, we decided to add a record button. This button can be pressed during a session to add the Recording to a .txt file once the therapy has finished. We thought this was a suitable way to record the history, and in the future the history feature could even be expanded to allow playback by reading from the .txt file if desired.
+- As it would be too lengthy to run a full 20 minute session for a demo, therapy minutes are represented in seconds.
