@@ -43,7 +43,7 @@ class MainWindow : public QMainWindow
         int softAnimation;
         int createUserDesignated; // 0 = not in mode, 1 = setting type, 2 = setting duration.
         int customLength; // used to set user designated session length
-        int randNum;
+        int randNum;    //Holds random number for connection test
 
         // variables holding specific positions for vectors
         int lengthPosition = 0;
@@ -111,9 +111,12 @@ class MainWindow : public QMainWindow
         /// Deplete batteryLvl by a variable level depending on length, intensity, and skin connection
         void depleteBattery();
 
+        /// Soft on and off animations
         void softOn();
         void softOff();
-        void savingAnimation();
+
+        /// Animation to blink the highest number when adjusting intensity
+        void intensityAnimation();
 
     private slots:
         // button handling
@@ -142,9 +145,13 @@ class MainWindow : public QMainWindow
         /// Finishes connection test
         void stopConnectionTest();
 
+        /// Controls which animation to show using softAnimationTimer
         void blinkNum();
+
+        /// Turns off softAnimationTimer
         void stopFlashing();
+
+         /// Animation for Good/Okay Connection test
         void goodConnection();
-        void startSessionTimer();
 };
 #endif // MAINWINDOW_H

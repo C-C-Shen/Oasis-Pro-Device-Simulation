@@ -144,7 +144,7 @@ void MainWindow::powerButtonRelease()
         if (!this->powerOn) {
             std::cout << "Long press to turn on" << std::endl;
         } else {
-            std::cout << "Cannot change group in when in user designated mode" << std::endl;
+            std::cout << "Long press to turn off" << std::endl;
         }
     }
 }
@@ -294,7 +294,6 @@ void MainWindow::confirmButtonRelease()
     if (elapsed >= 1000 && (currentSession != NULL) && !badConnection)
     {
         // Long Press to save preference
-        std::cout << typePosition << std::endl;
 
         if (lengthPosition == 2 && sessions[2].size() == 1) {
             typePosition = 0;
@@ -314,7 +313,6 @@ void MainWindow::confirmButtonRelease()
     {
         // Long Press while selecting user designated to create a user designated session
 
-        // TODO: should there be a way to overwrite/delet old sessions if we want new ones but already have 8 slots filled
         if (sessions.size() == 3) {
             if (sessions[2].size() >= 8) {
                 std::cout << "No more slots left for user designated sessions" << std::endl;
@@ -425,7 +423,6 @@ void MainWindow::endSession()
     currentSessionTimer->stop();
 
     // remove current session
-    //delete currentSession;
     currentSession = NULL;
 
     skinConnection = false;
@@ -440,14 +437,12 @@ void MainWindow::initializeTimer()
     }
 }
 
-void MainWindow::startSessionTimer()
-{
-    currentSessionTimer->start(1000);
-}
-
 void MainWindow::updateTime()
 {
     depleteBattery();
+
+    if(!powerOn)
+        return;
 
     if(elaspedTime == currentSession->getSessionLength().toInt())
     {
@@ -605,7 +600,6 @@ bool MainWindow::testConnection()
     connectionButtonsLit = true;
     testConnectionTimer->start(1000);
     softAnimationtTimer->stop();
-    //testConnectionTimer->singleShot(5000, this, SLOT(stopConnectionTest()));
 
     for (int i = 0; i < dm->getLengthNumSize(); i++)
     {
@@ -638,7 +632,6 @@ void MainWindow::flashConnection()
         testConnectionAnimation->singleShot(4000,this, SLOT(stopConnectionTest()));
         badConnection = false;
         testConnectionTimer->stop();
-
         return;
     }
     else
@@ -686,7 +679,7 @@ void MainWindow::blinkNum()
     }
     else if (softAnimation == 3)
     {
-        savingAnimation();
+        intensityAnimation();
     }
     else if (softAnimation == 4)
     {
@@ -735,9 +728,8 @@ void MainWindow::softOff()
     numToFlash--;
 }
 
-void MainWindow::savingAnimation()
+void MainWindow::intensityAnimation()
 {
-
     int leveltoFlash = floor(currentSession->getIntensity()) - 1;
 
     if (leveltoFlash < 0)
