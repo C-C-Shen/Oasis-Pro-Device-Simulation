@@ -1,9 +1,11 @@
 # COMP3004 Team 33
 ## Team Members
 - Gurpiar Brar
-  - Battery Stuff
-  - Intensity Stuff
-  - Documentation
+  - Battery
+  - Adjusting Intensity
+  - Saving Preferences
+  - Animations
+  - Use Cases
 - Kayla Gingras
   - UI
   - Documentation
