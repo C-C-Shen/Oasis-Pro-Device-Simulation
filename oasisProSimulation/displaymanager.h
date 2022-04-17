@@ -4,6 +4,9 @@
 #include <QLabel>
 #include <math.h>
 #include <QString>
+#include <stdlib.h>
+#include <iostream>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

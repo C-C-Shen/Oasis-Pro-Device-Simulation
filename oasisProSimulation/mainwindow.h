@@ -43,6 +43,7 @@ class MainWindow : public QMainWindow
         int softAnimation;
         int createUserDesignated; // 0 = not in mode, 1 = setting type, 2 = setting duration.
         int customLength; // used to set user designated session length
+        int randNum;
 
         // variables holding specific positions for vectors
         int lengthPosition = 0;
@@ -59,6 +60,7 @@ class MainWindow : public QMainWindow
         QTimer* currentSessionTimer; // timer that calls timeout() to reduce battery level and check if session time is up
         QTimer* testConnectionTimer;
         QTimer* softAnimationtTimer;
+        QTimer* testConnectionAnimation;
 
         Session* currentSession; // current session being used
 
@@ -142,5 +144,7 @@ class MainWindow : public QMainWindow
 
         void blinkNum();
         void stopFlashing();
+        void goodConnection();
+        void startSessionTimer();
 };
 #endif // MAINWINDOW_H

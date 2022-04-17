@@ -155,11 +155,13 @@ void DisplayManager::flashConnection(QString temp, bool connectionLit, bool bad)
         // flash bad connection on/off
         if (connectionLit)
         {
+
             sessionNumLabel[6]->setStyleSheet(sessionNum_off);
             sessionNumLabel[7]->setStyleSheet(sessionNum_off);
         }
         else
         {
+
             sessionNumLabel[6]->setStyleSheet(sessionNum_on[6]);
             sessionNumLabel[7]->setStyleSheet(sessionNum_on[7]);
         }
@@ -183,6 +185,8 @@ void DisplayManager::connection(bool connected)
     else
     {
         ui->cesLeftLabel->setPixmap(L_on_red);
+        ui->cesRightLabel->setPixmap(R_on_red);
+
     }
 }
 

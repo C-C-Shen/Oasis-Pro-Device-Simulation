@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     currentSessionTimer = new QTimer(this);
     testConnectionTimer = new QTimer(this);
     softAnimationtTimer = new QTimer(this);
+    testConnectionAnimation = new QTimer(this);
     currentSession = NULL;
 
     recorder.setFile(fileName);
@@ -43,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(testConnectionTimer, SIGNAL(timeout()), this, SLOT(flashConnection()));
     connect(currentSessionTimer, SIGNAL(timeout()), this, SLOT(updateTime()));
     connect(softAnimationtTimer, SIGNAL(timeout()), this, SLOT(blinkNum()));
+    connect(testConnectionAnimation, SIGNAL(timeout()), this, SLOT(goodConnection()));
+
 
     // Initialize default sessions
     QVector<QString> g = {"20", "45", "User"}; // lengths are actually just groups
@@ -89,6 +92,8 @@ void MainWindow::powerButtonPress()
 void MainWindow::powerButtonRelease()
 {
     int elapsed = this->elapsedTimer.elapsed();
+    if(testConnectionAnimation->isActive())
+        return;
 
     // for now, "long" press is anything over 2 seconds
     if (elapsed >= 2000)
@@ -152,6 +157,8 @@ void MainWindow::chargeBattery()
 
 void MainWindow::connectToSkin()
 {
+    if(testConnectionAnimation->isActive())
+            return;
     skinConnection = !skinConnection;
     std::cout << "Skin connection: " << skinConnection << std::endl;
 
@@ -172,25 +179,20 @@ void MainWindow::connectToSkin()
         if(skinConnection)
         {
             badConnection=false;
-            dm->connection(true);
-            currentSessionTimer->start(1000);
+
         }
     }
 }
 
 void MainWindow::upButtonPress()
 {
-    if(badConnection)
+    if(badConnection|| softAnimation == 1 || testConnectionAnimation->isActive())
         return;
 
     if (powerOn && !testConnectionTimer->isActive())
     {
         std::cout << "Up button pressed" << std::endl;
 
-        if (softAnimation == 1)
-        {
-            std::cout<<"Interrupt!"<<std::endl;
-        }
 
         if (currentSession != NULL)
         {
@@ -230,7 +232,7 @@ void MainWindow::upButtonPress()
 
 void MainWindow::downButtonPress()
 {
-    if(badConnection)
+    if(badConnection|| softAnimation == 1 || testConnectionAnimation->isActive())
         return;
     if (powerOn && !testConnectionTimer->isActive())
     {
@@ -423,12 +425,11 @@ void MainWindow::endSession()
     currentSessionTimer->stop();
 
     // remove current session
-    delete currentSession;
+    //delete currentSession;
     currentSession = NULL;
 
     skinConnection = false;
     elaspedTime = 0;
-
 }
 
 void MainWindow::initializeTimer()
@@ -437,6 +438,11 @@ void MainWindow::initializeTimer()
     {
         currentSessionTimer->start(1000);
     }
+}
+
+void MainWindow::startSessionTimer()
+{
+    currentSessionTimer->start(1000);
 }
 
 void MainWindow::updateTime()
@@ -466,13 +472,16 @@ void MainWindow::depleteBattery()
     elaspedTime += 1;
     batteryLvl -= (currentSession->getIntensity() > 1) ? (0.2+(currentSession->getIntensity() / 10)) : (0.2);
 
+    if (batteryLvl <= 0)
+    {
+        batteryLvl = 0;
+        this->powerOn = false;
+        handlePowerOff();
+        std::cout << "Battery Depleted, Please Replace." << std::endl;
+        return;
+    }
     std::cout << "Battery Level: " << batteryLvl << std::endl;
 
-    if (batteryLvl == 0)
-    {
-        powerOn = false;
-        handlePowerOff();
-    }
 }
 
 void MainWindow::displaySessionSelect()
@@ -593,38 +602,19 @@ void MainWindow::switchType(int direction)
 bool MainWindow::testConnection()
 {
     // Start connection test and end it after 5 seconds
+    connectionButtonsLit = true;
     testConnectionTimer->start(1000);
-    testConnectionTimer->singleShot(5000, this, SLOT(stopConnectionTest()));
+    softAnimationtTimer->stop();
+    //testConnectionTimer->singleShot(5000, this, SLOT(stopConnectionTest()));
 
     for (int i = 0; i < dm->getLengthNumSize(); i++)
     {
         dm->numberOff(i);
     }
 
-    if (skinConnection)
-    {
-        // randomize either okay or excellent connection if skin is connected
-        if ((rand() % 2) == 1)
-        {
-            // excellent connection
-            dm->testConnectionLights(1);
-        }
-        else
-        {
-            // okay connection
-            dm->testConnectionLights(2);
-        }
+    randNum = rand() %2;
 
-        badConnection = false;
-        return true;
-    }
-    else
-    {
-        // no connection
-        badConnection = true;
-        dm->testConnectionLights(0);
-        return false;
-    }
+    return true;
 }
 
 void MainWindow::flashConnection()
@@ -637,17 +627,37 @@ void MainWindow::flashConnection()
         badConnection = false;
         return;
     }
+    if (skinConnection)
+    {
+        for (int i = 0; i < dm->getLengthNumSize(); i++)
+        {
+            dm->numberOff(i);
+        }
+        dm->connectionTestOff();
+        testConnectionAnimation->start(1000);
+        testConnectionAnimation->singleShot(4000,this, SLOT(stopConnectionTest()));
+        badConnection = false;
+        testConnectionTimer->stop();
 
-    QString tempFreq = currentSession->getFrequency();
+        return;
+    }
+    else
+    {
 
-    dm->flashConnection(tempFreq, connectionButtonsLit, badConnection);
-    connectionButtonsLit = !connectionButtonsLit;
+        QString tempFreq = currentSession->getFrequency();
+
+        dm->flashConnection(tempFreq, connectionButtonsLit, badConnection);
+        connectionButtonsLit = !connectionButtonsLit;
+        badConnection = true;
+    }
+
 }
 
 void MainWindow::stopConnectionTest()
 {
     // Stop connection test, reset vars, and attempt to initialize timer
     testConnectionTimer->stop();
+    testConnectionAnimation->stop();
     connectionButtonsLit = false;
     dm->connectionTestOff();
 
@@ -727,7 +737,6 @@ void MainWindow::softOff()
 
 void MainWindow::savingAnimation()
 {
-//    std::cout<<"Intensity: " << currentSession->getIntensity() << " : " << floor(currentSession->getIntensity()) << std::endl;
 
     int leveltoFlash = floor(currentSession->getIntensity()) - 1;
 
@@ -743,3 +752,20 @@ void MainWindow::stopFlashing()
 {
     softAnimationtTimer->stop();
 }
+
+void MainWindow::goodConnection()
+{
+    // randomize either okay or excellent connection if skin is connected
+    if (randNum == 1)
+    {
+        // excellent connection
+        dm->testConnectionLights(1);
+    }
+    else
+    {
+        // okay connection
+        dm->testConnectionLights(2);
+    }
+}
+
+
