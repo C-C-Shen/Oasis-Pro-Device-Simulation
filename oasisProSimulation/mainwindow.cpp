@@ -348,6 +348,10 @@ void MainWindow::confirmButtonRelease()
 
                 // minimum length is 20, and increases in 20 minute intervals
                 Session *newS = new Session(QString::number(20+customLength*20),t[typePosition],f[typePosition],0);
+
+                //if all 8 slots full, last slot saved
+                if (sessions[2].size()==8)
+                    sessions[2].pop_back();
                 sessions[2].push_back(newS);
 
                 currentSession = new Session(newS);
@@ -454,11 +458,28 @@ void MainWindow::updateTime()
     if ((elaspedTime % 5) == 0)
     {
         stopFlashing();
-        dm->displayBatteryLevel(batteryLvl);
+        int leveltodisplay = (batteryLvl * 0.8)/10;
+        std::cout<<"LEVEL TO DISPLAY: "<<leveltodisplay<<std::endl;
+        if(leveltodisplay<=1){
+            softAnimation = 5;
+            typePosition = 0;
+            softAnimationtTimer->start(150);
+        }
+        else if (leveltodisplay<=2){
+            softAnimation = 5;
+            typePosition = 1;
+            softAnimationtTimer->start(150);
+        }
+        else{
+            dm->displayBatteryLevel(batteryLvl);
+        }
     }
     else
     {
+        if (softAnimation==5)
+            softAnimationtTimer->stop();
         dm->displayIntensityLevel(currentSession->getIntensity());
+
     }
 }
 
@@ -684,6 +705,10 @@ void MainWindow::blinkNum()
     else if (softAnimation == 4)
     {
         dm->flash0To8Level(typePosition, &flashValue);
+    }
+    else if (softAnimation ==5)
+    {
+        dm->flashBatteryLow(typePosition,&flashValue);
     }
 }
 

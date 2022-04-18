@@ -254,6 +254,35 @@ void DisplayManager::flash0To8Level(int valueToFlash, bool *flashVal)
     *flashVal = !*flashVal;
 }
 
+void DisplayManager::flashBatteryLow(int battery, bool *flashVal)
+{
+    for (int i = 0; i < 8; i++)
+    {
+        numberOff(i);
+    }
+    if (*flashVal)
+    {
+        if(battery==1){
+            sessionNumLabel[0]->setStyleSheet(sessionNum_on[0]);
+            sessionNumLabel[1]->setStyleSheet(sessionNum_on[1]);
+        }
+        else{
+            sessionNumLabel[0]->setStyleSheet(sessionNum_on[0]);
+        }
+    }
+    else
+    {
+        if(battery==1){
+            sessionNumLabel[0]->setStyleSheet(sessionNum_off);
+            sessionNumLabel[1]->setStyleSheet(sessionNum_off);
+        }
+        else{
+            sessionNumLabel[0]->setStyleSheet(sessionNum_off);
+        }
+    }
+    *flashVal = !*flashVal;
+}
+
 void DisplayManager::lightsOff()
 {
     for (std::size_t i = 0; i < sessionLengthLabel.size(); i++)

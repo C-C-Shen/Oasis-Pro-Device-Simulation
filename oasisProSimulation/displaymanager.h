@@ -46,6 +46,9 @@ public:
     /// Helper to flash the correct value on 0 to 8 labels
     void flash0To8Level(int valueToFlash, bool *flashVal);
 
+    /// Helper to flash the correct two values on 0 to 8 labels
+    void flashBatteryLow(int battery,bool *flashVal);
+
     /// Turn off a specified type light
     void typeOff(int target) { sessionTypeLabel[target]->setPixmap(sessionType_off[target]); }
 
